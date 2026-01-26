@@ -15,6 +15,61 @@ FRAME_DIR="data/raw/images/youtube/frames"
 LOG_DIR="logs"
 
 # --------------------------------------------------
+# Dependency checks
+# --------------------------------------------------
+
+check_command () {
+  command -v "$1" >/dev/null 2>&1
+}
+
+OS="$(uname -s)"
+
+missing=0
+
+if ! check_command yt-dlp; then
+  echo "❌ yt-dlp is not installed."
+  missing=1
+fi
+
+if ! check_command ffmpeg; then
+  echo "❌ ffmpeg is not installed."
+  missing=1
+fi
+
+if [ "$missing" -eq 1 ]; then
+  echo ""
+  echo "📦 Missing dependencies detected."
+  echo "Please install them using the appropriate command:"
+  echo ""
+
+  case "$OS" in
+    Darwin)
+      echo "macOS (Homebrew):"
+      echo "  brew install yt-dlp ffmpeg"
+      ;;
+    Linux)
+      echo "Linux (APT):"
+      echo "  sudo apt update && sudo apt install -y yt-dlp ffmpeg"
+      ;;
+    MINGW*|MSYS*|CYGWIN*)
+      echo "Windows:"
+      echo "  Option 1 (recommended): Use WSL"
+      echo "    https://learn.microsoft.com/windows/wsl/"
+      echo "  Option 2: Install binaries manually"
+      echo "    yt-dlp:  https://github.com/yt-dlp/yt-dlp#installation"
+      echo "    ffmpeg:  https://ffmpeg.org/download.html"
+      ;;
+    *)
+      echo "Unknown OS. Please install yt-dlp and ffmpeg manually."
+      ;;
+  esac
+
+  echo ""
+  echo "🚫 Aborting pipeline."
+  exit 1
+fi
+
+# --------------------------------------------------
 # Sanity checks
 # --------------------------------------------------
 
