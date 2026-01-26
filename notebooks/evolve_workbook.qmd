@@ -36,7 +36,7 @@ Such conditions are rarely represented in standard computer vision benchmarks (e
 
 The objective of this project is to **fine-tune an existing deep convolutional neural network** to detect key visual components of concert scenes under these extreme conditions.
 
-# 2.  Task Definition
+# 2. Task Definition
 
 ## 2.1. Chosen Task
 
@@ -202,14 +202,27 @@ evolve/
 ```
 
 
-### 3.2 YouTube Scraping Pipeline
+### 3.2. YouTube Scraping Pipeline
 
+The YouTube data collection pipeline is implemented as an external shell script:
+-   **Path**: `scripts/youtube_pipeline.sh`
+-   **Purpose**:
+    -   download publicly available YouTube videos using `yt-dlp`
+    -   extract video frames at a fixed temporal rate using `ffmpeg`
+    -   log all operations for reproducibility
 
-Images are extracted from YouTube videos using an automated pipeline based on:
--   `yt-dlp`, `ffmpeg`) to download YouTube videos,
--   `ffmpeg` to extract frames at a fixed temporal rate,
+The pipeline is kept **outside the notebook** in order to:
+-   avoid accidental execution during notebook rendering,
+-   ensure reproducibility via a single entry-point script,
+-   allow execution on different machines or environments.
 
-The pipeline is executed from within the Quarto environment to ensure reproducibility.
+**Execution command (manual):**
+```bash
+bash scripts/youtube_pipeline.sh
+```
+Logs are written to:
+-   `logs/ytdlp.log`
+-   `logs/ffmpeg.log`
 
 ### 3.2.1. Queries
 
@@ -260,7 +273,6 @@ pro shot
 hd live
 4k concert
 ```
-
 
 #### 3.2.2. Pipeline implementation (script generation + execution)
 
@@ -319,6 +331,19 @@ EOF
 chmod +x "$SCRIPT_DIR/youtube_scraping.sh"
 bash "$SCRIPT_DIR/youtube_scraping.sh"
 ```
+## 3.3. Scripts Overview
+
+The project relies on a small set of external scripts to ensure modularity and reproducibility.
+
+| Script | Location | Description |
+|------|--------|------------|
+| `youtube_pipeline.sh` | `scripts/` | Downloads YouTube videos and extracts frames |
+| `preprocess_images.py` *(optional)* | `scripts/` | Applies light preprocessing for dataset inspection |
+| `split_yolo_dataset.py` *(optional)* | `scripts/` | Splits annotated images into train / val / test sets |
+
+
+Only lightweight inspection code is kept inside the workbook.
+All heavy or destructive operations are delegated to scripts.
 
 # 4. Preprocessing
 
@@ -330,7 +355,6 @@ The following preprocessing steps are applied to homogenize the dataset:
 -   optional denoising
 
 The preprocessing is intentionally light, in order to preserve the difficulty of the original scenes.
-
 
 ## 4.1. Preprocessing setup
 
@@ -449,8 +473,9 @@ axes[1].set_title("Preprocessed image")
 axes[1].axis("off")
 ```
 
-Note: Preprocessing is applied primarily for exploratory analysis and dataset inspection.  
-Raw images are preserved for training the detection model in order to avoid unintended distribution shifts, as resizing and normalization are handled internally by the YOLO pipeline.
+Note: Preprocessing is applied exclusively for exploratory analysis and dataset inspection.  
+Raw images are preserved for training the detection model in order to avoid unintended distribution shifts. 
+All resizing, normalization, and augmentation steps used for training are handled internally by the YOLO pipeline.
 
 # 5. Annotation Protocol
 
