@@ -670,6 +670,65 @@ yolo detect predict \
 -   No redistribution of collected images
 -   Academic and non-commercial usage only
 
+<details><summary><str>TO DO LIST</str><summary>
 
+1. Récupérer des images
+2. Geler les conventions
+    -   format image unique (`.jpg`)
+    -   renommer les images (`img_000001.jpg`, `img_000002.jpg`, etc.)
+    -   vérifier qu'on a bien les mêmes 6 classes et le même ordre (celui de `dataset.yaml`)
+3. Centraliser les images candidates
+    -   tout mettre dans `data/raw/`
+    -   retirer les images inutilisables (trop floyes, trop sombres, sujet invisible, etc.)
+    -   faire un dédup rapide (retirer les frames trop similaires)
+    -   **output attendu** : `data/raw/`contient uniquement des images "annotables"
+4. Créer le pool d'annotation
+    -   copier (pas déplacer) les images retenus dans `data/annotations/yolo/images/`
+    -   renommer si nécessaire en séquence propre (flemme)
+    -   **output attendu** : `data/annotations/yolo/images/`= les images qui seront annotées
+5. Annotation (CVAT/Roboflow)
+    -   annoter dans l'outil les 6 classes
+    -   exporter en YOLO format
+    -   récupérer les images + les labels `.txt`
+    -   mettre les exports finaux dans :
+        -   images : `data/annotations/yolo/images/ (si elles y sont déjà, vérifier la cohérence des noms)
+        -   labels : `data/annotations/yolo/labels/`
+    - **output attendu** : pour chaque `img_xxxxxx.jpg`il existe `img_xxxxxx.txt`
+6. Sanity checks avant split
+    -   lancer le script `scripts/sanity_checks.py`
+    -   corriger :
+        -   les images sans label
+        -   les labels sans image
+        -   les erreurs évidentes de classe (ex.: id hors [0.5])
+    -   lancer le script `scripts/count_instances.py`
+        -   vérifier la balance (minimum syndical = ~30 instances par classe)
+    - **output attendu** : dataset cohérent + stats d'instances
+7. Split + création du dataset YOLO final
+    -   lancer `scripts/prepare_yolo_dataset.py`
+    -   refaire un sanity check (oui, encore) : lancer `scripts/sanity_checks.py`
+    -   **output attendu** :
+        -   `data/yolo/images/train|val|test`
+        -   `data/yolo/labels/train|val|test`
+8. Vérifier `dataset.yaml`
+    -   ouvrir `data/yolo/dataset.yaml`
+    -   vérifier que `path:` et les chemins `train/val/test/ sont cohérents depuis l'endroit où est lancé YOLO
+    -   **output attendu** : YOLO trouve correctement les images + labels
+9. Entraînement (Colab/GPU)
+    -   uploader `data/yolo/`+ notebooks Jupyter + `dataset.yaml` sur Colab
+    -   lancer `evolve_notebook.ipynb`(sanity/debug)
+    -    puis un vrai run avec `yolov8s`
+    -   **output attendu** : `runs/evolve_yolo/weights/best.pt`
+10. Évaluation et figures
+    -   lancer `evolve_evaluation.ipynb`
+    -   récupérer :
+        -   per-class AP
+        -   mAP global
+        -   6-12 images "best examples/worst failures" avec commentaires
+    -   **outputs attendus** : graphiques + exemples + inteprétation
+11. Loop d'amélioration (si résultats décevants)
+    -   rééquilibrer les classes (+ d'exemples des classes faibles)
+    -   ajouter de la diversité (angles, distances, luminosité)
+    -   ajuster hyperparams (epochs, imgsz, batch, augment)
+    -   tester `yolov8m` (si dataset assez grand)
 
-
+</details>
