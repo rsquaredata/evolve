@@ -714,19 +714,26 @@ yolo detect predict \
     -   ouvrir `data/yolo/dataset.yaml`
     -   vérifier que `path:` et les chemins `train/val/test/ sont cohérents depuis l'endroit où est lancé YOLO
     -   **output attendu** : YOLO trouve correctement les images + labels
-9. Entraînement (Colab/GPU)
+9. Baseline
+    -   lancer `baseline_eval.ipynb`
+    -   récupérer :
+        -   mAP@0.5 global
+        -   AP par classe
+    -   sauvegarder les résultats (table + logs)
+    -   **output attendu** : métriques baseline -> section 5.1. dans le rapport
+10. Entraînement (Colab/GPU)
     -   uploader `data/yolo/`+ notebooks Jupyter + `dataset.yaml` sur Colab
     -   lancer `evolve_notebook.ipynb`(sanity/debug)
     -    puis un vrai run avec `yolov8s`
     -   **output attendu** : `runs/evolve_yolo/weights/best.pt`
-10. Évaluation et figures
+11. Évaluation et figures
     -   lancer `evolve_evaluation.ipynb`
     -   récupérer :
         -   per-class AP
         -   mAP global
         -   6-12 images "best examples/worst failures" avec commentaires
     -   **outputs attendus** : graphiques + exemples + inteprétation
-11. Loop d'amélioration (si résultats décevants)
+12. Loop d'amélioration (si résultats décevants)
     -   rééquilibrer les classes (+ d'exemples des classes faibles)
     -   ajouter de la diversité (angles, distances, luminosité)
     -   ajuster hyperparams (epochs, imgsz, batch, augment)
