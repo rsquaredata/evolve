@@ -169,10 +169,10 @@ Evaluation is performed using:
 - visualization of correct detections
 - analysis of false positives and false negatives
 - inspection of failure cases related to:
-- low-light conditions
-- motion blur
-- occlusions
-- dense crowd dynamics
+    - low-light conditions
+    - motion blur
+    - occlusions
+    - dense crowd dynamics
 
 ---
 
