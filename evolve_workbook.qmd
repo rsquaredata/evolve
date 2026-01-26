@@ -1,0 +1,650 @@
+---
+title: "EVOLVE — Computer Vision in Extreme Live Music Environments"
+subtitle: "Detection of Scene Components under Low-Light and High-Motion Conditions"
+authors:
+  - ACVial38
+  - rsquaredata
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    theme: cosmo
+execute:
+  echo: true
+  warning: false
+  message: false
+jupyter: python3
+---
+
+# 1. Project Overview
+
+EVOLVE is a computer vision project focusing on **object detection** in images captured during live metal concerts.
+
+These environments combine several challenging visual conditions:
+
+-   very low illumination
+-   strong colored lighting (red, blue)
+-   motion blur
+-   dense crowds
+-   handheld camera instability
+
+
+Such conditions are rarely represented in standard computer vision benchmarks (e.g. COCO, Pascal VOC), yet they are common in real-world applications.
+
+The objective of this project is to **fine-tune an existing deep convolutional neural network** to detect key visual components of concert scenes under these extreme conditions.
+
+# 2.  Task Definition
+
+## 2.1. Chosen Task
+
+> Object detection of semantic scene components in extreme live metal concert environments
+
+The task consists in detecting and localizing predefined visual elements using bounding boxes.
+
+A transfer learning approach is adopted, starting from a model pre-trained on a large-scale dataset and fine-tuned on a custom annotated dataset.
+
+## 2.2. Target Classes
+
+The following six classes are defined:
+
+| **Class name** | **Definition** | **Annotation rules** |
+|---------------|----------------|----------------------|
+| `amp` | Stage amplifier or stage monitor visible on stage (e.g. guitar amp, bass amp, wedge monitor) | Rectangular or cubic object placed on the ground or stacked. One bounding box per amplifier or grouped boxes allowed if multiple amps are tightly packed. |
+| `guitar` | Guitar or bass instrument visible in the image | Instrument must be visually identifiable (body and/or neck). The musician is not the target, only the instrument. |
+| `drums` | Drum kit or part of a drum kit (snare, toms, cymbals, bass drum) | Partial visibility is sufficient. The drummer’s body is not required. |
+| `micro` | Vocal microphone, handheld or on a stand | Microphone must be clearly identifiable. Hand + microphone is acceptable. The singer as a person is ignored. |
+| `mosh_pit` | Area of intense collective crowd movement (pogo, circle pit, wall of death) | Annotate the region, not individuals. One large bounding box is sufficient. |
+| `hands_raised` | Area containing multiple raised hands or arms in the crowd | At least two arms or hands must be visible simultaneously. Group-level annotation only. |
+
+### Class Design Rationale
+
+All classes correspond to concrete, visually observable objects or structured crowd patterns, ensuring annotation consistency and suitability for object detection models.
+
+## 2.3. Ultra-Precise Annotation Protocol
+
+### 2.3.1. General Rules (apply to all classes)
+
+**Image-level rules**:
+-   Annotate only what is clearly visible
+-   If unsure → do not annotate
+-   One image can contain multiple classes
+-   Overlapping bounding boxes are allowed
+-   Bounding boxes may be coarse (pixel-perfect precision is NOT required)
+
+❌ What NOT to do:
+-   Do not guess hidden objects
+-   Do not annotate extremely small or barely visible elements
+-   Do not annotate reflections, posters, or screens
+
+### 2.3.2. Class Specific Annotation Rules
+
+`amp`:
+-   Annotate each visible amplifier OR group them if tightly packed
+-   Do NOT annotate:
+    -   speaker arrays hanging above the stage
+    -   PA systems far from the stage
+-   If unsure between amp and generic box → ignore
+
+`guitar`:
+-   Annotate when:
+    -   guitar or bass body or neck is visible
+-   Partial visibility is OK (e.g. neck only)
+-   Do NOT annotate:
+    -   cables
+    -   guitar cases
+    -   blurred shapes with no clear guitar form
+
+`drums`:
+-   Annotate when:
+    -   at least one drum element is clearly identifiable
+-   Cymbals alone are sufficient
+-   Do NOT annotate:
+    -   decorative drum graphics on screens
+    -   crowd members holding round objects
+
+`micro`:
+-   Annotate when:
+    -   microphone shape is clearly visible
+    -   handheld or on a stand
+-   Do NOT annotate:
+    -   headset microphones
+    -   distant mic stands without visible microphone head
+-   Priority rule:
+    -   if a microphone is visible → annotate `micro` **even if the singer is moving**
+
+`mosh_pit`:
+-   Annotate when:
+    -   collective chaotic movement is visible
+    -   structure such as circle pit, pogo, wall of death can be inferred visually
+-   Use one large bounding box
+-   Do NOT annotate:
+    -   static crowd
+    -   small local movements
+
+`hands_raised`:
+-   Annotate when:
+    -   **two or more arms/hands** are raised simultaneously
+    -   gesture is collective and visible
+-   Do NOT annotate:
+    -   single raised arm
+    -   musician’s arm on stage
+-   One box per group is sufficient
+
+### 2.3.3. Conflict Resolution Rules
+
+When two classes could apply:
+
+| **Situation**                   | **Rule**                                         |
+| ------------------------------- | ------------------------------------------------ |
+| Guitarist singing into a mic    | Annotate **`micro`** and **`guitar`** separately |
+| Drum kit partially hidden       | Annotate **`drums`** if any part is visible      |
+| Raised hands inside a mosh pit  | Annotate **both** `mosh_pit` and `hands_raised`  |
+| Static crowd with raised phones | Ignore (no class)                                |
+
+
+### 2.3.4. Dataset Balance Targets
+
+Aim for **at least**:
+-   30–40 instances per class
+-   ≥ 150 annotated images total
+-   Every class present in both train and validation sets
+
+⚠️ If one class falls below 20 instances → **stop and reassess**, do NOT continue annotating blindly.
+
+### 2.3.5. Annotation Stopping Criteria
+
+Stop annotating when:
+-   all classes reach ≥ 30 instances
+-   new images add no new visual diversity
+-   annotators start hesitating frequently (signal of saturation)
+
+## 2.4. Scientific Motivation
+
+Detecting concrete stage-related objects and structured crowd patterns in live metal concert imagery enables the study of object detection performance under extreme real-world conditions.
+
+In particular, this task makes it possible to analyze:
+-    model robustness under low-light and motion-degraded conditions,
+-    confusion between visually related object classes (e.g. `guitar` vs `micro`, or `hands_raised` within `mosh_pit` regions),
+-    the effect of object scale and visibility on detection performance,
+-    the impact of crowd dynamics on localization accuracy.
+
+This approach allows us to assess the limits of standard object detection models when applied outside their typical training distribution.
+
+## 3. Dataset Construction
+
+### 3.1. Data Sources
+
+The dataset is composed of images collected from multiple sources:
+
+-    Personal photographs taken during live metal concerts
+-    Frames extracted from publicly available YouTube videos
+-    Images collected from online image search engines
+
+All data are used strictly for **academic and non-commercial purposes**.
+
+```{text}
+evolve/
+├── notebooks/
+│   └── evolve_detection.qmd
+├── scripts/
+│   └── youtube_pipeline.sh
+├── data/
+│   ├── youtube/
+│   │   ├── videos/
+│   │   └── frames/
+│   ├── processed/
+│   │   └── images/
+│   └── annotations/
+└── logs/
+```
+
+
+### 3.2 YouTube Scraping Pipeline
+
+
+Images are extracted from YouTube videos using an automated pipeline based on:
+-   `yt-dlp`, `ffmpeg`) to download YouTube videos,
+-   `ffmpeg` to extract frames at a fixed temporal rate,
+
+The pipeline is executed from within the Quarto environment to ensure reproducibility.
+
+### 3.2.1. Queries
+
+```{text}
+# =========================================================
+# Example YouTube search queries for EVOLVE dataset building
+# =========================================================
+
+# General live concert footage
+metal concert live crowd
+death metal concert live
+metal concert night crowd
+metal show live audience
+
+# Smartphone / amateur recordings
+metal concert smartphone
+death metal live phone footage
+metal concert handheld
+metal concert fan cam
+
+# Crowd dynamics (mosh pits, movement)
+mosh pit metal concert
+wall of death metal concert
+circle pit metal live
+
+# Festivals (high visual variability)
+metal festival crowd night
+metal open air festival night
+metal festival live audience
+
+# Full sets (long, consistent footage)
+death metal full set live
+metal live full concert
+metal band full show live
+
+# Front row / pit perspective
+metal concert front row
+metal live front row pit
+
+# Recent footage (lighting + phone quality)
+metal concert 2022 crowd
+metal concert 2023 live
+death metal live 2024
+
+# Keywords to AVOID (too clean / professional)
+official video
+pro shot
+hd live
+4k concert
+```
+
+
+#### 3.2.2. Pipeline implementation (script generation + execution)
+
+```{bash}
+#!/bin/bash
+
+# ================================
+# EVOLVE — YouTube Scraping Pipeline
+# ================================
+
+URL_FILE="../data/youtube/youtube_urls.txt"
+VIDEO_DIR="../data/youtube/videos"
+FRAME_DIR="../data/youtube/frames"
+LOG_DIR="../logs"
+SCRIPT_DIR="../scripts"
+
+mkdir -p "$VIDEO_DIR" "$FRAME_DIR" "$LOG_DIR" "$SCRIPT_DIR"
+
+cat << 'EOF' > "$SCRIPT_DIR/youtube_scraping.sh"
+#!/bin/bash
+set -e
+
+URL_FILE="data/youtube/youtube_urls.txt"
+VIDEO_DIR="data/youtube/videos"
+FRAME_DIR="data/youtube/frames"
+LOG_DIR="logs"
+
+mkdir -p "$VIDEO_DIR" "$FRAME_DIR" "$LOG_DIR"
+
+echo "▶ Downloading YouTube videos"
+
+yt-dlp \
+  -f "bv*[height<=1080]" \
+  -o "$VIDEO_DIR/%(uploader)s_%(id)s.%(ext)s" \
+  -a "$URL_FILE" \
+  --no-playlist \
+  --restrict-filenames \
+  --merge-output-format mp4 \
+  --write-info-json \
+  | tee "$LOG_DIR/ytdlp.log"
+
+echo "▶ Extracting frames (1 frame every 5 seconds)"
+
+for v in "$VIDEO_DIR"/*.mp4; do
+  name=$(basename "$v" .mp4)
+  mkdir -p "$FRAME_DIR/$name"
+
+  ffmpeg -i "$v" -vf fps=0.2 \
+    "$FRAME_DIR/$name/%04d.jpg" \
+    2>> "$LOG_DIR/ffmpeg.log"
+done
+
+echo "✔ YouTube scraping pipeline completed."
+EOF
+
+chmod +x "$SCRIPT_DIR/youtube_scraping.sh"
+bash "$SCRIPT_DIR/youtube_scraping.sh"
+```
+
+# 4. Preprocessing
+
+The following preprocessing steps are applied to homogenize the dataset:
+
+-   resizing images to a fixed resolution
+-   normalization of pixel values
+-   optional contrast enhancement (CLAHE)
+-   optional denoising
+
+The preprocessing is intentionally light, in order to preserve the difficulty of the original scenes.
+
+
+## 4.1. Preprocessing setup
+
+```{python}
+import os
+from pathlib import Path
+import cv2
+import numpy as np
+from tqdm import tqdm
+```
+
+## 4.2. Paths & parameters
+
+```{python}
+# Input / output directories
+RAW_DIR = Path("../data/youtube/frames")
+OUT_DIR = Path("../data/processed/images")
+
+OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# Target image size
+IMG_SIZE = (224, 224)
+
+# Preprocessing flags
+APPLY_CLAHE = True
+APPLY_DENOISING = False
+```
+
+## 4.3. Preprocessing functions
+
+```{python}
+def preprocess_image(img_path):
+    """
+    Preprocess a single image:
+    - resize
+    - optional denoising
+    - contrast enhancement (CLAHE)
+    - normalization
+    """
+    img = cv2.imread(str(img_path))
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    # Resize
+    img = cv2.resize(img, IMG_SIZE, interpolation=cv2.INTER_AREA)
+
+    # Optional denoising
+    if APPLY_DENOISING:
+        img = cv2.fastNlMeansDenoisingColored(
+            img, None, 5, 5, 7, 21
+        )
+
+    # Contrast enhancement (CLAHE on luminance)
+    if APPLY_CLAHE:
+        lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
+        l, a, b = cv2.split(lab)
+
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        l = clahe.apply(l)
+
+        lab = cv2.merge((l, a, b))
+        img = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB)
+
+    # Normalize to [0, 1]
+    img = img.astype(np.float32) / 255.0
+
+    return img
+```
+
+## 4.4. Dataset preprocessing loop
+
+```{python}
+processed_count = 0
+
+for root, _, files in os.walk(RAW_DIR):
+    for file in tqdm(files):
+        if not file.lower().endswith(".jpg"):
+            continue
+
+        src_path = Path(root) / file
+        out_name = f"img_{processed_count:05d}.png"
+        out_path = OUT_DIR / out_name
+
+        img = preprocess_image(src_path)
+
+        # Save image
+        cv2.imwrite(
+            str(out_path),
+            cv2.cvtColor((img * 255).astype(np.uint8), cv2.COLOR_RGB2BGR)
+        )
+
+        processed_count += 1
+
+processed_count
+```
+
+## 4.5. Sanity check
+
+```{python}
+import matplotlib.pyplot as plt
+import random
+
+raw_imgs = list(RAW_DIR.rglob("*.jpg"))
+proc_imgs = list(OUT_DIR.glob("*.png"))
+
+raw_sample = random.choice(raw_imgs)
+proc_sample = random.choice(proc_imgs)
+
+fig, axes = plt.subplots(1, 2, figsize=(8, 4))
+
+axes[0].imshow(cv2.cvtColor(cv2.imread(str(raw_sample)), cv2.COLOR_BGR2RGB))
+axes[0].set_title("Raw image")
+axes[0].axis("off")
+
+axes[1].imshow(cv2.cvtColor(cv2.imread(str(proc_sample)), cv2.COLOR_BGR2RGB))
+axes[1].set_title("Preprocessed image")
+axes[1].axis("off")
+```
+
+Note: Preprocessing is applied primarily for exploratory analysis and dataset inspection.  
+Raw images are preserved for training the detection model in order to avoid unintended distribution shifts, as resizing and normalization are handled internally by the YOLO pipeline.
+
+# 5. Annotation Protocol
+
+## 5.1. Annotation Tool
+
+Annotations are performed using one of the following tools:
+-   CVAT
+-   Roboflow Annotate
+
+Bounding boxes are drawn manually for each target class.
+
+## 5.2. Annotation Guidelines
+
+Annotations follow the **Ultra-Precise Annotation Protocol** defined in Section 2.3.
+
+General principles:
+-    Bounding boxes may be coarse (pixel-perfect precision is not required)
+-    Multiple objects and multiple classes may appear in the same image
+-    Overlapping bounding boxes are allowed
+-    Small, ambiguous, or barely visible elements may be ignored
+
+Only visually identifiable instances should be annotated.
+
+## 5.3. Dataset Requirements
+
+The dataset follows the project constraints:
+-   6 classes
+-   ≥ 30 annotated examples per class
+-   ≥ 150 images total
+-   split into training, validation, and test sets
+
+# 6. Model Architecture
+
+## 6.1. Chosen Model
+
+A **YOLO-based object detection model** is selected for this project.
+
+Motivations for this choice:
+-   real-time object detection capability
+-   strong performance on diverse visual conditions
+-   availability of pre-trained weights
+-   straightforward fine-tuning in PyTorch
+
+### Dataset Architecture (YOLO)
+
+```{text}
+evolve/
+├── data/
+│   └── yolo/
+│       ├── images/
+│       │   ├── train/
+│       │   ├── val/
+│       │   └── test/
+│       ├── labels/
+│       │   ├── train/
+│       │   ├── val/
+│       │   └── test/
+│       └── dataset.yaml
+├── notebooks/
+│   └── evolve_detection.qmd
+├── runs/
+└── logs/
+```
+
+### `dataset.yaml`
+
+Path: `data/yolo/dataset.yaml`
+
+```yaml
+path: data/yolo
+
+train: images/train
+val: images/val
+test: images/test
+
+nc: 6
+
+names:
+  0: amp
+  1: guitar
+  2: drums
+  3: micro
+  4: mosh_pit
+  5: hands_raised
+```
+
+### Annotation format (YOLO)
+
+Each image:
+```
+image_00012.jpg
+image_00012.txt
+```
+
+Format of an annotation line:
+```
+<class_id> <x_center> <y_center> <width> <height>
+```
+
+Example (`image_00012.txt`)=
+```{text}
+0 0.51 0.78 0.32 0.18
+3 0.62 0.44 0.08 0.15
+5 0.48 0.85 0.60 0.20
+```
+→ `amp`, `micro`, `hands_raised`
+
+### YOLOv8 train
+
+```bash
+pip install ultralytics
+```
+```bash
+yolo detect train \
+  model=yolov8n.pt \
+  data=data/yolo/dataset.yaml \
+  epochs=50 \
+  imgsz=640 \
+  batch=16 \
+  device=auto
+```
+
+**Possible Models**:
+
+| **Model**    | **Usage**                           |
+| ------------ | ----------------------------------- |
+| `yolov8n.pt` | fast / debug                        |
+| `yolov8s.pt` | **good compromise**                 |
+| `yolov8m.pt` | heavier, for a dataset > 300 images |
+
+
+
+## 6.2. Transfer Learning Strategy
+
+-   model initialized with pre-trained weights
+-   detection head fine-tuned on the EVOLVE dataset
+-   backbone optionally frozen during early epochs
+
+# 7. Training Procedure
+
+This section is implemented in a **separate training notebook**, as required by the project.
+
+It includes:
+-   dataset loading
+-   hyperparameter selection
+-   training curves
+-   loss monitoring
+
+
+# 8. Evaluation
+
+Evaluation is performed in a **separate evaluation notebook**.
+
+```bash
+yolo detect val \
+  model=runs/detect/train/weights/best.pt \
+  data=data/yolo/dataset.yaml
+```
+Automatic results:
+-   mAP@50
+-   mAP@50:95
+-   Precision / Recall per class
+
+**Qualitative Inference (images)**
+
+```bash
+yolo detect predict \
+  model=runs/detect/train/weights/best.pt \
+  source=data/yolo/images/test \
+  conf=0.25
+```
+
+## 8.1. Quantitative Metrics
+
+-   mean Average Precision (mAP)
+-   Intersection over Union (IoU)
+-   precision / recall per class
+
+## 8.2. Qualitative Analysis
+
+-   visualization of correct detections
+-   common failure cases
+-   confusion between visually similar classes
+
+
+# 9. Limitations & Ethical Considerations
+
+-   Dataset size remains limited
+-   Annotations are subjective and coarse
+-   No redistribution of collected images
+-   Academic and non-commercial usage only
+
+
+
+
+
+
