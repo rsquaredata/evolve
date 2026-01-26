@@ -1,3 +1,7 @@
+# ============================
+# EVOLVE — YOLO dataset config
+# ============================
+
 path: data/yolo
 
 train: images/train
