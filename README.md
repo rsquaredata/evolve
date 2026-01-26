@@ -207,10 +207,12 @@ evolve/
 │   │  └── web_images/             # Other images
 │   └── yolo/
 │       ├── images/
-│       │   ├── train/
+│       │   ├── all/               # Images ready for annotation
+│       │   ├── train/             # Created after split
 │       │   ├── val/
 │       │   └── test/
 │       ├── labels/
+│       │   ├── all/               # Manual annotation
 │       │   ├── train/
 │       │   ├── val/
 │       │   └── test/
