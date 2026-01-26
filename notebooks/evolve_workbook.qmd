@@ -481,49 +481,65 @@ Motivations for this choice:
 
 ```{text}
 evolve/
+├── notebooks/
+│   ├── evolve_workbook.qmd        # Project definition, task, classes, annotation protocol
+│   ├── evolve_training.ipynb      # YOLO training (GPU / Colab)
+│   └── evolve_evaluation.ipynb    # Quantitative & qualitative evaluation
+│
 ├── data/
-│   ├── youtube/
-│   │   ├── videos/              # Raw YouTube videos (downloaded)
-│   │   └── frames/              # Extracted video frames
-│   │
 │   ├── raw/
-│   │   ├── personal_photos/     # Personal concert photographs
-│   │   └── web_images/          # Images scraped from web search engines
+│   │   └── images/
+│   │       ├── youtube/
+│   │       │   ├── videos/        # Downloaded YouTube videos (.mp4)
+│   │       │   └── frames/        # Extracted video frames (.jpg)
+│   │       │
+│   │       ├── personal/
+│   │       │   └── photos/        # Personal concert photographs
+│   │       │
+│   │       └── web/
+│   │           └── images/        # Images scraped from web search engines
+│   │
+│   ├── processed/
+│   │   └── images/                # Preprocessed images (EDA / visualization only)
 │   │
 │   ├── annotations/
+│   │   ├── raw/                   # CVAT / Roboflow exports (original format)
 │   │   └── yolo/
-│   │       ├── images/          # Images selected and manually annotated
-│   │       └── labels/          # Corresponding YOLO-format label files
+│   │       ├── images/
+│   │       │   └── all/            # Images selected for annotation
+│   │       └── labels/
+│   │           └── all/            # YOLO labels (before splitting)
 │   │
-│   ├── yolo/
-│   │   ├── images/
-│   │   │   ├── train/
-│   │   │   ├── val/
-│   │   │   └── test/
-│   │   ├── labels/
-│   │   │   ├── train/
-│   │   │   ├── val/
-│   │   │   └── test/
-│   │   └── dataset.yaml         # YOLO dataset configuration
-│   │
-│   └── processed/
-│       └── images/              # Optional preprocessed images (inspection only)
+│   └── yolo/
+│       ├── images/
+│       │   ├── train/              # Training images
+│       │   ├── val/                # Validation images
+│       │   └── test/               # Test images
+│       │
+│       ├── labels/
+│       │   ├── train/              # Training labels
+│       │   ├── val/                # Validation labels
+│       │   └── test/               # Test labels
+│       │
+│       └── dataset.yaml            # YOLO dataset configuration
 │
 ├── scripts/
-│   ├── youtube_pipeline.sh      # YouTube download + frame extraction
-│   ├── prepare_yolo_dataset.py  # Train/val/test split and dataset assembly
+│   ├── youtube_pipeline.sh         # YouTube scraping & frame extraction
+│   ├── prepare_yolo_dataset.py    # Train/val/test split for YOLO
+│   ├── count_instances.py          # Class instance statistics
+│   ├── sanity_checks.py            # Image/label consistency checks
 │   └── utils/
-│       ├── preprocess_images.py # Optional inspection preprocessing
-│       ├── count_instances.py   # Class distribution checks
-│       └── sanity_checks.py     # Image/label consistency checks
+│       └── preprocess_images.py    # Optional preprocessing (EDA only)
 │
-├── notebooks/
-│   ├── evolve_detection.qmd     # Main project workbook
-│   ├── evolve_training.ipynb    # Training notebook (YOLO fine-tuning)
-│   └── evolve_evaluation.ipynb  # Evaluation and analysis notebook
+├── runs/
+│   └── detect/                     # YOLO training outputs (weights, metrics, predictions)
 │
-├── runs/                        # YOLO training outputs (auto-generated)
-└── logs/                        # Logs from scraping and training
+├── logs/
+│   ├── ytdlp.log                   # yt-dlp logs
+│   └── ffmpeg.log                  # ffmpeg logs
+│
+├── README.md
+└── LICENSE
 ```
 
 ### `dataset.yaml`
