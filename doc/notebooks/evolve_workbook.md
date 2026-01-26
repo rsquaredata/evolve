@@ -686,7 +686,15 @@ yolo detect predict \
 
 <details><summary><str>TO DO LIST</str></summary>
 
-1. Récupérer des images
+1. Créer le dataset YouTube (en local)
+    -   créer un dossier dépôt `evolve` avec les sous-dossiers nécessaires :
+        -   `evolve/data/raw/images/youtube/videos/`
+        -   `evolve/data/raw/images/youtube/videos/`
+        -   `evolve/scripts/`
+    -   télécharger :
+        -   `scripts/youtube_pipeline.sh` -> à mettre dans `evolve/scripts/`
+        -   `data/raw/images/youtube/youtube_urls.txt` -> à mettre dans `evolve/data/raw/images/youtube/`
+    -   dans le terminal, lancer la commande : `bash scripts/youtube_pipeline.sh`
 2. Geler les conventions
     -   format image unique (`.jpg`)
     -   renommer les images (`img_000001.jpg`, `img_000002.jpg`, etc.)
