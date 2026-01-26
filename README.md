@@ -201,10 +201,19 @@ evolve/
 │   ├── evolve_training.ipynb      # YOLO training (GPU / Colab)
 │   └── evolve_evaluation.ipynb    # Quantitative & qualitative evaluation
 ├── data/
-│   ├── raw/
-│   │  ├── photos/                 # Personal photos
-│   │  ├── youtube_frames/         # Extracted frames
-│   │  └── web_images/             # Other images
+│   ├── sources/
+│   │      ├── youtube/
+│   │      │   ├── videos/
+│   │      │   └── frames/
+│   │      ├── personal/
+│   │      │   └── photos/
+│   │      └── web/
+│   │          └── images/
+│   ├── processed/
+│   │      └── images/
+│   ├── annotations/
+│   │      ├── raw/               # CVAT / Robolow exports
+│   │      └── yolo/              # Converted YOLO annotations
 │   └── yolo/
 │       ├── images/
 │       │   ├── all/               # Images ready for annotation
@@ -218,8 +227,13 @@ evolve/
 │       │   └── test/
 │       └── dataset.yaml           # YOLO dataset configuration
 ├── runs/                          # YOLO training outputs (weights, logs, predictions)
+│    └── detect/
 ├── scripts/                       # Data collection & preprocessing scripts
+│    ├── youtube_pipeline.sh
+│    └── prepare_yolo_dataset.py
 ├── logs/                          # Scraping and processing logs
+│    ├── ytdlp.log
+│    └── ffmpeg.log
 ├── README.md
 └── LICENSE
 ```
