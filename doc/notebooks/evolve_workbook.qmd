@@ -152,7 +152,7 @@ Aim for **at least**:
 -   ≥ 150 annotated images total
 -   Every class present in both train and validation sets
 
-⚠️ If one class falls below 20 instances → **stop and reassess**, do NOT continue annotating blindly.
+⚠️ If one class falls below 30 instances → **stop and reassess**, do NOT continue annotating blindly.
 
 ### 2.3.5. Annotation Stopping Criteria
 
@@ -609,7 +609,7 @@ yolo detect train \
 | `yolov8s.pt` | **good compromise**                 |
 | `yolov8m.pt` | heavier, for a dataset > 300 images |
 
-
+**Note - Resolution Strategy**: We use `imgsz=640` to preserve the geometric integrity of target classes. High-frequency details of small objects are a priority fallback when color and contrast cues are unreliable.
 
 ## 6.2. Transfer Learning Strategy
 
@@ -671,7 +671,7 @@ yolo detect predict \
 -   No redistribution of collected images
 -   Academic and non-commercial usage only
 
-<details><summary><str>TO DO LIST</str><summary>
+<details><summary><str>TO DO LIST</str></summary>
 
 1. Récupérer des images
 2. Geler les conventions
