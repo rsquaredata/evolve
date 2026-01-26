@@ -8,7 +8,7 @@ Last updated: 2026-01-26
 
 # EVOLVE – Literature Review (Computer Vision in Low‑Light & Crowd Scenarios)
 
-This document synthesizes and positions the main contributions of the provided research papers **with a direct focus on the EVOLVE project** (Extreme Vision Over Low‑light and Volatile Environments).
+This document synthesizes and positions the main contributions of the provided research papers **with a direct focus on the EVOLVE project** (Extreme Vision Over Low‑light and Volatile Environments).  
 For each paper, we provide: **(i)** a concise summary, **(ii)** key technical contributions, and **(iii)** explicit relevance for EVOLVE, including *quotable or citable ideas*.
 
 ---
