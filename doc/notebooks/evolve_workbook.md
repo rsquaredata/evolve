@@ -1,3 +1,4 @@
+<!--
 ---
 title: "EVOLVE — Computer Vision in Extreme Live Music Environments"
 subtitle: "Detection of Scene Components under Low-Light and High-Motion Conditions"
@@ -18,6 +19,18 @@ execute:
   message: false
 jupyter: python3
 ---
+-->
+
+💡 To execute the present file as an interactive notebook using [Quarto](https://quarto.org/):
+1. Save the file locally as `evolve_workbook.qmd`
+3. Open the file with [RStudio](https://posit.co/download/rstudio-desktop/).
+4. remove the HTML comment tags (`<--` and `-->`) surrounding the YAML header.
+5. Render or run the document as a Quarto notebook.
+
+</br>
+</br>
+</br>
+
 
 # 1. Project Overview
 
