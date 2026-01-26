@@ -4,19 +4,41 @@ IMG_DIR = Path("data/yolo/images")
 LBL_DIR = Path("data/yolo/labels")
 
 for split in ["train", "val", "test"]:
-    imgs = list((IMG_DIR / split).glob("*.jpg"))
-    lbls = list((LBL_DIR / split).glob("*.txt"))
+    img_dir = IMG_DIR / split
+    lbl_dir = LBL_DIR / split
+
+    imgs = list(img_dir.glob("*.jpg"))
+    lbls = list(lbl_dir.glob("*.txt"))
 
     print(f"\n[{split.upper()}]")
     print(f"Images: {len(imgs)}")
     print(f"Labels: {len(lbls)}")
 
-    missing = []
-    for img in imgs:
-        if not (LBL_DIR / split / (img.stem + ".txt")).exists():
-            missing.append(img.name)
+    # Image without label
+    missing_labels = [
+        img.name for img in imgs
+        if not (lbl_dir / f"{img.stem}.txt").exists()
+    ]
 
-    if missing:
-        print(f"⚠ Missing labels for {len(missing)} images")
+    # Label without image
+    orphan_labels = [
+        lbl.name for lbl in lbls
+        if not (img_dir / f"{lbl.stem}.jpg").exists()
+    ]
+
+    # Empty label files
+    empty_labels = [
+        lbl.name for lbl in lbls
+        if lbl.read_text().strip() == ""
+    ]
+
+    if missing_labels:
+        print(f"⚠ Images without labels: {len(missing_labels)}")
     else:
         print("✔ All images have label files")
+
+    if orphan_labels:
+        print(f"⚠ Labels without images: {len(orphan_labels)}")
+
+    if empty_labels:
+        print(f"⚠ Empty label files: {len(empty_labels)}")
