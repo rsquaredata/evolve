@@ -6,13 +6,13 @@
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.x-red.svg)](https://pytorch.org/)
-[![Detectron2](https://img.shields.io/badge/Detectron2-Object%20Detection-orange.svg)](https://github.com/facebookresearch/detectron2)
+[![YOLOv8](https://img.shields.io/badge/YOLOv8-Object%20Detection-orange.svg)](https://github.com/ultralytics/ultralytics)
 [![License](https://img.shields.io/badge/License-Academic-lightgrey.svg)]()
 
 *Master 2 SISE Project – Computer Vision*  
 *Université Lumière Lyon 2 | 2025-2026*
 
-[Overview](#overview) • [Methodology](#methodology) • [Dataset](#dataset) • [Models](#modeling) • [Evaluation](#evaluation)
+[Overview](#overview) • [Academic Context](#academic-context) • [Objectives](#objectives) • [Methodology](#methodology) • [Dataset](#dataset) • [Modeling](#modeling) • [Evaluation](#evaluation)
 
 ---
 
@@ -34,18 +34,26 @@
 
 ---
 
+</div>
+
 ## Overview
 
-**EVOLVE** (*Extreme Vision Over Low-light and Volatile Environments*) is a computer vision project dedicated to the study of **object detection in extreme and unconstrained visual environments**.
+**EVOLVE** (*Extreme Vision Over Low-light and Volatile Environments*) is a computer vision project dedicated to **object detection in extreme real-world visual environments**, with a specific focus on **live metal concert imagery**.
 
-The project focuses on real-world scenes characterized by:
-- **low-light conditions**
-- **rapid illumination variations**
-- **strong motion dynamics**
+Such environments combine several challenging conditions for vision systems:
+
+- **very low illumination**
+- **strong and rapidly changing colored lighting**
+- **motion blur**
+- **dense crowds**
 - **frequent occlusions**
-- **high crowd density**
+- **handheld camera instability**
 
-The main objective is to analyze the **robustness and limitations** of deep learning–based object detectors under such challenging conditions.
+
+These conditions are rarely represented in standard computer vision benchmarks, yet they are common in real-world applications.
+
+
+The objective of EVOLVE is to **study the behavior, robustness, and failure modes of modern object detection models** when applied to such extreme and unconstrained scenes.
 
 ---
 
@@ -61,10 +69,10 @@ Course: **Computer Vision & Deep Learning**
 ## Objectives
 
 - Study **object detection under degraded visual conditions**
-- Evaluate modern detection models on **real-world, unconstrained data**
-- Analyze typical **failure modes** of convolutional neural networks
-- Discuss the **limitations of standard supervised approaches**
-- Propose **perspectives and improvements** for similar environments
+- Fine-tune a modern detection model using **transfer learning**
+- Analyze **robustness and limitations** of pre-trained models
+- Identify **typical failure modes** in low-light and high-motion scenes
+- Provide a **qualitative and quantitative analysis** beyond raw performance metrics
 
 ---
 
@@ -80,94 +88,132 @@ Course: **Computer Vision & Deep Learning**
 
 ## Methodology
 
-The project follows a classical computer vision experimental pipeline:
+The project follows a classical object detection experimental pipeline:
 
 ```
-Data collection
+Data collection (real-world images)
         ↓
 Exploratory dataset analysis
         ↓
-Manual annotation (bounding boxes)
+Manual annotation (YOLO bounding boxes)
         ↓
-Training object detection models
+Fine-tuning a pre-trained detection model
         ↓
-Quantitative and qualitative evaluation
+Quantitative evaluation (mAP, precision, recall)
         ↓
-Error analysis and discussion
+Qualitative error analysis and discussion
 ```
 
 ---
 
 ## Dataset
 
-- Images collected from **unconstrained real-world scenes**
-- Visual conditions include:
-  - low illumination
-  - volatile and rapidly changing lighting
-  - motion blur
-  - dense crowds
-- Annotations in **COCO format**
-- Main object classes:
-  - person
-  - raised_arm
-  - mobile_phone
-  - microphone
-  - guitar_bass
+### Data sources
 
-> ⚠️ Due to size and licensing constraints, the full dataset is not stored in this repository.
+- Personal photographs taken during live metal concerts
+- Frames extracted from publicly available YouTube videos
+- Images collected from online image search engines
+
+All data are used strictly for **academic and non-commercial purposes**.
+
+### Annotation format
+
+- **YOLO format** (normalized bounding boxes)
+- Manual annotation using CVAT or Roboflow
+- Coarse bounding boxes allowed (focus on robustness, not pixel-perfect accuracy)
+
+### Target classes
+
+The dataset includes **six object classes**:
+
+
+| Class name | Description |
+|-----------------|-------------|
+| `amp` | Stage amplifiers or monitors |
+| `guitar` | Guitar or bass instruments |
+| `drums` | Drum kit or drum elements |
+| `micro` | Vocal microphones |
+| `mosh_pit` | Areas of intense collective crowd movement |
+| `hands_raised` | Groups of raised hands in the crowd |
+
+> ⚠️ Due to size and licensing constraints, the dataset itself is **not distributed** in this repository.
 
 ---
 
 ## Modeling
 
 - Framework: **PyTorch**
-- Library: **Detectron2**
-- Models explored:
-  - Faster R-CNN (ResNet backbone)
-- Supervised training
-- Hyperparameter tuning within the scope of the course
+- Detection library: **YOLOv8 (Ultralytics)**
+- Approach: **transfer learning**
+- Starting point: YOLOv8 model pre-trained on COCO
+- Fine-tuning performed on the EVOLVE dataset
+
+YOLO was selected for:
+- strong performance in diverse visual conditions
+- robustness to scale variations
+- ease of fine-tuning and evaluation
+- widespread adoption in applied computer vision
 
 ---
 
 ## Evaluation
 
-- Standard object detection metrics:
-  - mAP
-  - Precision / Recall
-- Per-class analysis
-- Qualitative error analysis:
-  - false positives
-  - false negatives
-  - errors related to lighting and occlusions
+Evaluation is performed using:
+
+### Quantitative metrics
+- mean Average Precision (mAP)
+- Precision and Recall per class
+- Intersection over Union (IoU)
+
+### Qualitative analysis
+- visualization of correct detections
+- analysis of false positives and false negatives
+- inspection of failure cases related to:
+- low-light conditions
+- motion blur
+- occlusions
+- dense crowd dynamics
 
 ---
 
 ## Limitations and Perspectives
 
 ### Limitations
-- Intentionally limited dataset size
-- Costly manual annotation process
+- Limited dataset size
+- Subjective and coarse annotations
 - High intra-class variability
+- Strong domain shift with respect to standard benchmarks
 
 ### Perspectives
-- Targeted data augmentation
-- Exploration of more robust architectures
-- Transfer to other extreme visual environments
-- Comparison with one-stage detectors
+- Targeted data augmentation strategies
+- Comparison across YOLO model sizes
+- Ablation studies on preprocessing choices
+- Extension to other extreme visual environments (clubs, festivals, protests)
 
 ---
 
 ## Project Structure
 
 ```
-EVOLVE/
-│
-├── notebooks/          # Experiments and analyses
-├── src/                # Utility scripts
-├── configs/            # Detectron2 configurations
-├── analysis/           # Analysis and visualizations
-├── figures/            # Figures for the report
-├── data/               # Data (structure only)
+evolve/
+├── notebooks/
+│   ├── evolve_workbook.qmd        # Project definition, dataset design, annotation protocol
+│   ├── evolve_training.ipynb      # YOLO training (GPU / Colab)
+│   └── evolve_evaluation.ipynb    # Quantitative & qualitative evaluation
+├── data/
+│   └── yolo/
+│       ├── images/
+│       │   ├── train/
+│       │   ├── val/
+│       │   └── test/
+│       ├── labels/
+│       │   ├── train/
+│       │   ├── val/
+│       │   └── test/
+│       └── dataset.yaml           # YOLO dataset configuration
+├── runs/                          # YOLO training outputs (weights, logs, predictions)
+├── scripts/                       # Data collection & preprocessing scripts
+├── logs/                          # Scraping and processing logs
 ├── README.md
 └── LICENSE
 ```
@@ -177,7 +223,7 @@ EVOLVE/
 ## License
 
 This project is developed in an **academic context**.  
-For educational use only.
+For **educational and non-commercial use only**.
 
 ---
 
