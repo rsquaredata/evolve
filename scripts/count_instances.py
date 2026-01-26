@@ -12,7 +12,7 @@ CLASS_NAMES = {
     5: "hands_raised"
 }
 
-MIN_INSTANCES = 20
+MIN_INSTANCES = 30
 
 total_counter = Counter()
 split_counter = defaultdict(Counter)
