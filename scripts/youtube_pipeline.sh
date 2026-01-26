@@ -48,11 +48,11 @@ yt-dlp \
 echo "▶ Extracting frames (1 frame every 5 seconds)..."
 
 shopt -s nullglob
-for v in "$VIDEO_DIR"/*.mp4; do
+for v in "$VIDEO_DIR"/*.mp4 "$VIDEO_DIR"/*.webm; do
   name=$(basename "$v" .mp4)
   mkdir -p "$FRAME_DIR/$name"
 
-  ffmpeg -i "$v" -vf fps=0.2 \
+  ffmpeg -i "$v" -vf fps=1 \
     "$FRAME_DIR/$name/%04d.jpg" \
     2>> "$LOG_DIR/ffmpeg.log"
 done
