@@ -9,9 +9,9 @@ set -e
 # - Intended for academic, non-commercial use only
 # ==================================================
 
-URL_FILE="data/youtube/youtube_urls.txt"
-VIDEO_DIR="data/youtube/videos"
-FRAME_DIR="data/youtube/frames"
+URL_FILE="data/raw/images/youtube/youtube_urls.txt"
+VIDEO_DIR="data/raw/images/youtube/videos"
+FRAME_DIR="data/raw/images/youtube/frames"
 LOG_DIR="logs"
 
 # --------------------------------------------------
