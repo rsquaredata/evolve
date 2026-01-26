@@ -14,7 +14,7 @@ While standard computer vision benchmarks (e.g., COCO) assume optimal lighting a
 
 ## 1.2. Project Objective
 
-The objective of this project is to implement an end-to-end pipeline for **Object Detection** in these volatile environments. We aim to demonstrate that by **fine-tuning** a State-of-the-Art (SOTA) architecture, namely **YOLOv8**, on a custom-curated dataset of 150+ images, we can maintain high detection accuracy even when traditional visual cues are significantly degraded.
+The objective of this project is to implement an end-to-end pipeline for **Object Detection** in these volatile environments. We aim to demonstrate that by **fine-tuning** a State-of-the-Art (SOTA) architecture, namely **YOLOv8**, on a custom-curated dataset of 150+ images, we aim to maintain meaningful detection performance even when traditional visual cues are significantly degraded.
 
 ## 2. Architecture Choice and Justification
 
@@ -24,7 +24,7 @@ For the EVOLVE project, we have selected **YOLOv8s** (You Only Look Once, versio
 
 The literature review highlights two major hurdles that YOLOv8 is uniquely equipped to handle:
 
-- **Feature recovery via FPN**: **Zhang et al. (2022)** emphasized the need for feature reuse to recover small-object information lost in deep layers. YOLOv8 utilizes a **Feature Pyramid Network (FPN)** and a Path Aggregation Network (PAN), which allow for multi-scale feature fusion. This ensures that faint structural cues of instruments or equipment are preserved across different spatial resolutions.
+- **Feature recovery via FPN**: **Zhang et al. (2022)** emphasized the need for feature reuse to recover small-object information lost in deep layers. YOLOv8 utilizes a **Feature Pyramid Network (FPN)** and a **Path Aggregation Network (PAN)**, which allow for multi-scale feature fusion. This ensures that faint structural cues of instruments or equipment are preserved across different spatial resolutions.
 
 - **Spatial attention and representation**: As **Morawski et al. (2021)** noted, low-light detection is a representation problem. YOLOv8’s use of **C2f modules** (cross-stage partial bottlenecks) enhances the gradient flow and allows the model to learn more robust representations of "camouflaged" targets, such as crowd members in deep shadows.
 
@@ -67,6 +67,8 @@ We defined 6 distinct classes that represent the structural and semantic pillars
 | `mosh_pit`     | Amorphous | High-motion crowd zones; defined by collective texture.   |
 | `hands_raised` | Amorphous | Foreground crowd silhouettes; high occlusion potential.   |
 
+These classes were deliberately designed to mix rigid objects and amorphous crowd phenomena, in order to test the limits of bounding-box-based detectors in volatile environments.
+
 ## 3.3. Quality Control and Preprocessing
 
 To ensure the integrity of the model's training, we implemented a multi-stage validation process:
@@ -83,7 +85,7 @@ This section details the specific configuration used in the `evolve_training.ipy
 
 We utilized a **Transfer Learning** strategy by initializing our model with weights from the COCO dataset. This allows the model to leverage pre-learned low-level features (edges, textures) while specializing the high-level detection head for our specific domain.
 
-- **Optimizer**: We utilized the **Auto-optimizer** (typically SGD or AdamW in YOLOv8) with a standard learning rate schedule.
+- **Optimizer**: As implemented in the Ultralytics YOLOv8 framework, we utilized the **Auto-optimizer** (typically SGD or AdamW in YOLOv8) with a standard learning rate schedule.
 - **Epochs**: Set to **50**, providing enough iterations for the model to converge on the specialized concert features without overfitting the small dataset.
 - **Batch size**: Set to **16**, a choice governed by GPU memory constraints in the Google Colab environment while maintaining sufficient gradient stability.
 - **Image resolution**: Maintained at 640x640. Given the adverse lighting conditions of the EVOLVE dataset, structural details are already degraded by noise. We maintained the native 640px resolution to maximize feature density. This prevents the "vanishing" of small semantic components, such as microphones or instruments, which are essential for accurate scene reconstruction in dense crowd environments.
@@ -92,7 +94,18 @@ We utilized a **Transfer Learning** strategy by initializing our model with weig
 
 ## 5.1. Quantitative Results (mAP)
 
-Following the transfer learning process, the model was evaluated on the unseen test set (10% of the total dataset). We utilize the **mean Average Precision (mAP@.5)** as our primary metric, which is the standard for object detection.
+Following the fine-tuning process, the model was evaluated on the unseen test set (10% of the total dataset). We report **mean Average Precision at IoU threshold 0.5 (mAP@0.5)**, which is the standard metric for object detection.
+
+To assess the actual impact of domain-specific fine-tuning, we compare our results against a baseline model consisting of a YOLOv8s network **pre-trained on COCO and evaluated directly on the EVOLVE test set without any fine-tuning**.
+
+This baseline represents the performance of a generic object detector when confronted with extreme low-light, high-density concert imagery.
+
+| **Model**               | **Precision** | **Recall** | **mAP@0.5** |
+| ----------------------- | ------------- | ---------- | ----------- |
+| YOLOv8s (COCO baseline) | -             | -          | -           |
+| YOLOv8s (EVOLVE FT)     | -             | -          | -           |
+
+A class-wise breakdown of the fine-tuned model is reported below:
 
 | **Class**      | **Precision** | **Recall** | **mAP@.5** |
 |----------------|---------------|------------|------------|
@@ -103,6 +116,8 @@ Following the transfer learning process, the model was evaluated on the unseen t
 | `mosh_pit`     | - | - | - | 
 | `hands_raised` | - | - | - | 
 | All Classes    | - | - | - | 
+
+As expected, the COCO-pretrained baseline struggles to generalize to EVOLVE-specific semantic concepts (e.g., `mosh_pit`, `hands_raised`) and to detect rigid objects under extreme illumination loss. Fine-tuning on the EVOLVE dataset significantly improves detection performance, confirming the importance of domain adaptation in volatile, low-visibility environments.
 
 ## 5.2. Qualitative Analysis: Success Cases
 
@@ -127,6 +142,7 @@ The EVOLVE project successfully demonstrates that **YOLOv8**, when properly fine
 
 - **Temporal integration**: Future iterations could move beyond static frames to utilize motion vectors (MII) directly from the video stream to resolve ambiguities in static silhouettes.
 - **Dataset expansion**: Increasing the instance count for the `micro` class would likely reduce the scale-invariance failures identified during evaluation.
+- **Representation learning beyond bounding boxes**: Exploring segmentation or region-based representations could better capture amorphous phenomena such as mosh pits.
 
 
 
