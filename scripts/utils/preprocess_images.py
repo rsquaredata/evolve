@@ -1,5 +1,7 @@
 """
-Utility script — not used in training pipeline
+Exploratory utility script.
+Used ONLY for visual inspection and dataset exploration.
+NOT used in training or annotation pipelines.
 """
 
 from pathlib import Path
@@ -8,7 +10,7 @@ import numpy as np
 from tqdm import tqdm
 
 RAW_DIR = Path("data/raw")
-OUT_DIR = Path("data/yolo/images/all")
+OUT_DIR = Path("data/processed/preview")
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
