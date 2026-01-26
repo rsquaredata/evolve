@@ -274,63 +274,18 @@ hd live
 4k concert
 ```
 
-#### 3.2.2. Pipeline implementation (script generation + execution)
+#### 3.2.2. YouTube Scraping Pipeline
 
-```{bash}
-#!/bin/bash
+The YouTube scraping pipeline is implemented as an external script:
+-   Path: `scripts/youtube_pipeline.sh`
+-   Executed manually from the command line
+-   Kept outside notebooks to avoid accidental execution
 
-# ================================
-# EVOLVE — YouTube Scraping Pipeline
-# ================================
-
-URL_FILE="../data/youtube/youtube_urls.txt"
-VIDEO_DIR="../data/youtube/videos"
-FRAME_DIR="../data/youtube/frames"
-LOG_DIR="../logs"
-SCRIPT_DIR="../scripts"
-
-mkdir -p "$VIDEO_DIR" "$FRAME_DIR" "$LOG_DIR" "$SCRIPT_DIR"
-
-cat << 'EOF' > "$SCRIPT_DIR/youtube_scraping.sh"
-#!/bin/bash
-set -e
-
-URL_FILE="data/youtube/youtube_urls.txt"
-VIDEO_DIR="data/youtube/videos"
-FRAME_DIR="data/youtube/frames"
-LOG_DIR="logs"
-
-mkdir -p "$VIDEO_DIR" "$FRAME_DIR" "$LOG_DIR"
-
-echo "▶ Downloading YouTube videos"
-
-yt-dlp \
-  -f "bv*[height<=1080]" \
-  -o "$VIDEO_DIR/%(uploader)s_%(id)s.%(ext)s" \
-  -a "$URL_FILE" \
-  --no-playlist \
-  --restrict-filenames \
-  --merge-output-format mp4 \
-  --write-info-json \
-  | tee "$LOG_DIR/ytdlp.log"
-
-echo "▶ Extracting frames (1 frame every 5 seconds)"
-
-for v in "$VIDEO_DIR"/*.mp4; do
-  name=$(basename "$v" .mp4)
-  mkdir -p "$FRAME_DIR/$name"
-
-  ffmpeg -i "$v" -vf fps=0.2 \
-    "$FRAME_DIR/$name/%04d.jpg" \
-    2>> "$LOG_DIR/ffmpeg.log"
-done
-
-echo "✔ YouTube scraping pipeline completed."
-EOF
-
-chmod +x "$SCRIPT_DIR/youtube_scraping.sh"
-bash "$SCRIPT_DIR/youtube_scraping.sh"
+Manual execution:
+```bash
+bash scripts/youtube_pipeline.sh
 ```
+
 ## 3.3. Scripts Overview
 
 The project relies on a small set of external scripts to ensure modularity and reproducibility.
@@ -346,6 +301,9 @@ Only lightweight inspection code is kept inside the workbook.
 All heavy or destructive operations are delegated to scripts.
 
 # 4. Preprocessing
+
+### Important
+The preprocessing described in this section is not used for **training**. It is performed exclusively for **exploratory analysis and dataset inspection**. All images used for training remain in their original resolution and format. YOLO’s internal preprocessing and augmentation mechanisms are used during training.
 
 The following preprocessing steps are applied to homogenize the dataset:
 
@@ -524,20 +482,48 @@ Motivations for this choice:
 ```{text}
 evolve/
 ├── data/
-│   └── yolo/
-│       ├── images/
-│       │   ├── train/
-│       │   ├── val/
-│       │   └── test/
-│       ├── labels/
-│       │   ├── train/
-│       │   ├── val/
-│       │   └── test/
-│       └── dataset.yaml
+│   ├── youtube/
+│   │   ├── videos/              # Raw YouTube videos (downloaded)
+│   │   └── frames/              # Extracted video frames
+│   │
+│   ├── raw/
+│   │   ├── personal_photos/     # Personal concert photographs
+│   │   └── web_images/          # Images scraped from web search engines
+│   │
+│   ├── annotations/
+│   │   └── yolo/
+│   │       ├── images/          # Images selected and manually annotated
+│   │       └── labels/          # Corresponding YOLO-format label files
+│   │
+│   ├── yolo/
+│   │   ├── images/
+│   │   │   ├── train/
+│   │   │   ├── val/
+│   │   │   └── test/
+│   │   ├── labels/
+│   │   │   ├── train/
+│   │   │   ├── val/
+│   │   │   └── test/
+│   │   └── dataset.yaml         # YOLO dataset configuration
+│   │
+│   └── processed/
+│       └── images/              # Optional preprocessed images (inspection only)
+│
+├── scripts/
+│   ├── youtube_pipeline.sh      # YouTube download + frame extraction
+│   ├── prepare_yolo_dataset.py  # Train/val/test split and dataset assembly
+│   └── utils/
+│       ├── preprocess_images.py # Optional inspection preprocessing
+│       ├── count_instances.py   # Class distribution checks
+│       └── sanity_checks.py     # Image/label consistency checks
+│
 ├── notebooks/
-│   └── evolve_detection.qmd
-├── runs/
-└── logs/
+│   ├── evolve_detection.qmd     # Main project workbook
+│   ├── evolve_training.ipynb    # Training notebook (YOLO fine-tuning)
+│   └── evolve_evaluation.ipynb  # Evaluation and analysis notebook
+│
+├── runs/                        # YOLO training outputs (auto-generated)
+└── logs/                        # Logs from scraping and training
 ```
 
 ### `dataset.yaml`
@@ -545,7 +531,7 @@ evolve/
 Path: `data/yolo/dataset.yaml`
 
 ```yaml
-path: data/yolo
+path: ../data/yolo
 
 train: images/train
 val: images/val
@@ -667,8 +653,6 @@ yolo detect predict \
 -   Annotations are subjective and coarse
 -   No redistribution of collected images
 -   Academic and non-commercial usage only
-
-
 
 
 
