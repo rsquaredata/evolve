@@ -196,10 +196,11 @@ Evaluation is performed using:
 
 ```
 evolve/
-├── notebooks/
-│   ├── evolve_workbook.qmd        # Project definition, task, classes, annotation protocol
-│   ├── evolve_training.ipynb      # YOLO training (GPU / Colab)
-│   └── evolve_evaluation.ipynb    # Quantitative & qualitative evaluation
+├── doc/
+│   └── notebooks/ 
+│           ├── evolve_workbook.qmd        # Project definition, task, classes, annotation protocol
+│           ├── evolve_training.ipynb      # YOLO training (GPU / Colab)
+│           └── evolve_evaluation.ipynb    # Quantitative & qualitative evaluation
 │
 ├── data/
 │   ├── raw/
