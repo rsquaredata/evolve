@@ -201,6 +201,10 @@ evolve/
 │   ├── evolve_training.ipynb      # YOLO training (GPU / Colab)
 │   └── evolve_evaluation.ipynb    # Quantitative & qualitative evaluation
 ├── data/
+│   ├── raw/
+│   │  ├── photos/                 # Personal photos
+│   │  ├── youtube_frames/         # Extracted frames
+│   │  └── web_images/             # Other images
 │   └── yolo/
 │       ├── images/
 │       │   ├── train/
