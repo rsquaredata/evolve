@@ -228,10 +228,13 @@ evolve/
 │       └── dataset.yaml           # YOLO dataset configuration
 ├── runs/                          # YOLO training outputs (weights, logs, predictions)
 │    └── detect/
-├── scripts/                       # Data collection & preprocessing scripts
-│    ├── youtube_pipeline.sh
-│    └── prepare_yolo_dataset.py
-├── logs/                          # Scraping and processing logs
+├── scripts/                       
+│    ├── youtube_pipeline.sh       # YouTube scraping
+│    ├── prepare_yolo_dataset.py   # YOLO dataset creation
+│    ├── count_instances.py        # Dataset audit (classes)
+│    ├── sanity_checks.py          # Annotation verifications
+│    └── preprocess_images.py      # EDA / vizualisation only
+├── logs/                          # Technical logs
 │    ├── ytdlp.log
 │    └── ffmpeg.log
 ├── README.md
