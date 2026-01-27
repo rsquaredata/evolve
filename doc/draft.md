@@ -54,6 +54,12 @@ Unlike standard datasets, the EVOLVE dataset was curated to capture "Extreme Vis
 - **Sampling**: Frames were extracted at a fixed temporal rate (1 frame every 5 seconds) using a custom shell script (`youtube_pipeline.sh`) to ensure visual diversity and avoid high temporal correlation between training samples.
 - **Selection**: Images were manually screened to ensure the presence of target semantic components under varying degrees of lighting volatility.
 
+1st batch:
+2650 frames from 16 YT videos
+✅ Pre-filtering completed
+✔ Kept images     : 798
+✖ Discarded images: 1851
+
 ## 3.2. Target Classes and Annotation
 
 We defined 6 distinct classes that represent the structural and semantic pillars of a live music environment. Each class was annotated with a minimum of 30 instances.
