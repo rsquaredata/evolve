@@ -694,6 +694,7 @@ yolo detect predict \
     -   télécharger :
         -   `scripts/youtube_pipeline.sh` -> à mettre dans `evolve/scripts/`
         -   `data/raw/images/youtube/youtube_urls.txt` -> à mettre dans `evolve/data/raw/images/youtube/`
+    -   dans `data/raw/images/youtube/youtube_urls.txt`, commenter le first batch et ajouter d'autres liens URLs à la suite
     -   dans le terminal, lancer la commande : `bash scripts/youtube_pipeline.sh`
 2. Geler les conventions
     -   format image unique (`.jpg`)
