@@ -1,3 +1,11 @@
+# EVOLVE — YouTube sources
+# Academic use only
+# Used for frame extraction (no redistribution)
+
+# ===========================================
+# First batch
+# ===========================================
+
 https://www.youtube.com/watch?v=nWyh1ZtCiQA
 https://youtu.be/Ia5Z7TQfHIE
 https://youtu.be/LNsKRschF64
