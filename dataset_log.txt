@@ -1,0 +1,46 @@
+# --------------------------------------------------
+# EVOLVE - Dataset Acquisition Log
+# --------------------------------------------------
+
+## Personal Footage
+
+[Personal - Pit Concert]
+Device: iPhone 13
+Resolution: 3840x2160
+FPS: 60
+Codec: HEVC (H.265)
+Total duration: 5388 seconds
+Stabilization: On (iOS default)
+
+[Personal - Gojira Concert]
+Device: iPhone 13
+Resolution: 3840x2160
+FPS: 60
+Codec: HEVC (H.265)
+Total duration: 3383 seconds
+Stabilization: On
+
+## YouTube Sources
+
+Number of videos: 16
+Download tool: yt-dlp
+Download format: best available
+Source types: professional recordings + amateur recordings
+Resolution: mixed (1080p–4K)
+
+Note:
+YouTube material is used strictly for research purposes.
+Raw videos are not redistributed.
+
+## Frame Extraction Summary
+
+Total extracted frames:
+
+- YouTube: 2649
+- Personal: 1848
+- Total: 4497
+
+Extraction parameters:
+- Uniform sampling
+- Frame redundancy control
+- No artificial filtering prior to luminance analysis
