@@ -1,21 +1,31 @@
+# =========================================================
+# EVOLVE – Git Ignore
+# =========================================================
+
 # ==============================
-# DATA
+# DATA (raw & generated)
 # ==============================
 
 data/raw/
 data/interim/
 data/processed/
+
+# Legacy folders
 data/annotation_phase1/
 data/annotation_pool/
 
-*.mp4
-*.mov
-*.MOV
-*.heic
-*.HEIC
-*.jpg
-*.jpeg
-*.png
+# ==============================
+# Media files (only inside data/)
+# ==============================
+
+data/**/*.mp4
+data/**/*.mov
+data/**/*.MOV
+data/**/*.heic
+data/**/*.HEIC
+data/**/*.jpg
+data/**/*.jpeg
+data/**/*.png
 
 # ==============================
 # CVAT / Docker
@@ -29,6 +39,13 @@ docker-compose.yml
 backups/
 
 # ==============================
+# Logs
+# ==============================
+
+logs/
+*.log
+
+# ==============================
 # Python
 # ==============================
 
@@ -38,22 +55,23 @@ __pycache__/
 *.pyd
 .ipynb_checkpoints/
 
-# Conda / virtualenv
+# ==============================
+# Virtual Environments
+# ==============================
+
 .env
 .venv
 env/
 evolve/
 
+# ==============================
+# Sensitive / Local Scripts
+# ==============================
+
 *download_youtube*
 
 # ==============================
-# MacOS
+# macOS
 # ==============================
 
 .DS_Store
-
-# ==============================
-# Logs
-# ==============================
-
-*.log
