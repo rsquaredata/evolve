@@ -1,0 +1,59 @@
+# ==============================
+# DATA
+# ==============================
+
+data/raw/
+data/interim/
+data/processed/
+data/annotation_phase1/
+data/annotation_pool/
+
+*.mp4
+*.mov
+*.MOV
+*.heic
+*.HEIC
+*.jpg
+*.jpeg
+*.png
+
+# ==============================
+# CVAT / Docker
+# ==============================
+
+cvat/
+docker-compose.yml
+*.tar
+*.zip
+*.sql
+backups/
+
+# ==============================
+# Python
+# ==============================
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+
+# Conda / virtualenv
+.env
+.venv
+env/
+evolve/
+
+*download_youtube*
+
+# ==============================
+# MacOS
+# ==============================
+
+.DS_Store
+
+# ==============================
+# Logs
+# ==============================
+
+*.log
