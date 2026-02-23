@@ -1,0 +1,20 @@
+# --------------------------------------------------
+# EVOLVE - Dataset Split Log
+# --------------------------------------------------
+
+Split strategy: Stratified by luminance category
+Random seed: 42
+
+Training set:
+- Images: 560
+- Labels: 560
+
+Validation set:
+- Images: 140
+- Labels: 140
+
+Class distribution verified: YES
+Data leakage check: PASSED
+Duplicate check: PASSED
+
+Date: 2026-02-23
