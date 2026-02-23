@@ -1,4 +1,5 @@
 name: evolve
+
 channels:
   - conda-forge
   - defaults
@@ -8,6 +9,9 @@ dependencies:
   - numpy
   - pandas
   - matplotlib
+  - seaborn
+  - scipy
+  - scikit-learn
   - opencv
   - jupyterlab
   - ipykernel
@@ -15,3 +19,4 @@ dependencies:
   - pip
   - pip:
       - ultralytics
+      - torch
