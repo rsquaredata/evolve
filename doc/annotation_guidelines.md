@@ -1,9 +1,9 @@
 # EVOLVE – Annotation Guidelines
 
-Version: 1.0  
+Version: 1.1  
 Project: EVOLVE (Extreme Vision Over Low-light and Volatile Environments)  
 Authors: Rina Razafimahefa, Anne-Camille Vial 
-Date: 2026-02-22  
+Date: 2026-02-24  
 
 ---
 
@@ -184,7 +184,17 @@ To reduce subjectivity:
 
 ---
 
-## 5. Quality Control
+## 5. Systematic Scanning Rule
+
+Before validating an image:
+1. Scan backline left to right for equipment (amp, drums)
+2. Scan foreground for dynamic classes
+3. Perform a second pass focusing only on thin objects (micro stands)
+4. Validate class checklist before submission
+
+---
+
+## 6. Quality Control
 
 After annotation:
 
@@ -195,7 +205,7 @@ After annotation:
 
 ---
 
-## 6. Known Limitations
+## 7. Known Limitations
 
 - `mosh_pit` bounding boxes are inherently subjective.
 - Small objects (`micro`) may be underrepresented.
@@ -203,7 +213,7 @@ After annotation:
 
 ---
 
-## 7. Ethical and Legal Note
+## 8. Ethical and Legal Note
 
 Images extracted from publicly available YouTube videos are used strictly for academic purposes.  
 The dataset is not redistributed publicly.  
