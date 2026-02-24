@@ -19,39 +19,39 @@
 
 ## Overview
 
-**EVOLVE** is a structured object detection study focused on **extreme low-light and volatile real-world environments**, using live metal concert imagery as a representative challenging domain.
+**EVOLVE** is a structured object detection study focused on visually challenging real-world environments, using live metal concert imagery as a representative challenging domain.
 
 These environments combine:
 
-- Very low illumination
+- Low and uneven illumination
 - Rapid and colored lighting shifts
 - Motion blur
 - Dense crowds
 - Frequent occlusions
 - Handheld instability
 
-Such conditions remain underrepresented in standard computer vision benchmarks.
+Such conditions introduce significant variability in visual scene properties.
 
-EVOLVE investigates:
+Beyond measuring detection performance under these conditions, EVOLVE investigates the following question:
 
-> How do modern object detection models behave when deployed in visually extreme, low-visibility scenarios?
+> How does object detection performance vary across visually challenging environments, and can this variability be explained by measurable scene properties?
 
-The project examines performance variation, degradation patterns, and failure modes under controlled lighting stratification.
+The project studies the statistical relationship between scene-level descriptors (visual and structural) and detection performance metrics.
 
 ---
 
 ## Research Orientation
 
-EVOLVE is both a modeling project and a **dataset construction and annotation calibration study**.
+EVOLVE combines;
 
-Key methodological components:
-
+- Dataset construction and annotation calibration  
 - Controlled luminance stratification  
-- Explicit inter-annotator calibration  
-- Structured quality control pipeline  
-- Performance analysis across lighting conditions  
+- Structured quality control  
+- Quantitative analysis of performance variability 
 
-The emphasis is placed on measurement, documentation, and controlled experimental design.
+A central objective is to determine whether measurable scene properties (e.g., luminance distribution, blur, spatial density) account for systematic differences in detection outcomes.
+
+The emphasis is placed on experimental control, measurement rigor, and reproducible analysis.
 
 ---
 
