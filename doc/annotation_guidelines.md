@@ -173,7 +173,24 @@ Blur alone is not a reason for exclusion.
 
 ---
 
-## 4. Annotation Consistency Strategy
+## 4. Label creation
+
+Refer to `annotation_guidelines` for full labels descriptions.
+
+Type = Rectangle.
+
+| label name   | color  |
+|--------------|--------|
+| amp          | 9E9E9E |
+| guitar       | 1E88E5 |
+| drums        | 8E24AA |
+| micro        | FDD835 |
+| mosh_pit     | FB8C00 |
+| hands_raised | 00ACC1 |
+
+---
+
+## 5. Annotation Consistency Strategy
 
 To reduce subjectivity:
 
@@ -184,7 +201,7 @@ To reduce subjectivity:
 
 ---
 
-## 5. Systematic Scanning Rule
+## 6. Systematic Scanning Rule
 
 Before validating an image:
 1. Scan backline left to right for equipment (amp, drums)
@@ -194,7 +211,7 @@ Before validating an image:
 
 ---
 
-## 6. Quality Control
+## 7. Quality Control
 
 After annotation:
 
@@ -205,7 +222,7 @@ After annotation:
 
 ---
 
-## 7. Known Limitations
+## 8. Known Limitations
 
 - `mosh_pit` bounding boxes are inherently subjective.
 - Small objects (`micro`) may be underrepresented.
@@ -213,7 +230,7 @@ After annotation:
 
 ---
 
-## 8. Ethical and Legal Note
+## 9. Ethical and Legal Note
 
 Images extracted from publicly available YouTube videos are used strictly for academic purposes.  
 The dataset is not redistributed publicly.  
