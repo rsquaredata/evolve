@@ -101,7 +101,7 @@ Bounding box must tightly follow the vertical structure without excessive backgr
 ### 4 — `mosh_pit`
 
 **Definition:**  
-Any coordinated collective crowd movement typical of high-energy metal concerts.
+Localized structural rupture within an otherwise dense, stage-oriented crowd, allowing inference of coordinated collective movement from spatial configuration alone.
 
 This includes, but is not limited to:
 
@@ -113,19 +113,16 @@ This includes, but is not limited to:
 - Sudden coordinated forward/backward surges
 
 **Nature:**  
-This class represents *collective behavior*, not individuals.
+This class represents collective behavior rather than individual objects.
 
-**Annotation rule:**  
-Draw a bounding box around the active crowd movement zone.
+**Annotation rule:**
+Because of its contextual and structurally complex nature, detailed annotation rules are provided in a dedicated document:
 
-The box should:
-- Enclose the region where coordinated motion is visible
-- Avoid including large static background areas
-- Prioritize spatial coherence over perfect geometric fit
+→ See `mosh_pit_guidelines.md`  
 
 **Important:**  
 Do not annotate isolated individuals as `mosh_pit`.  
-There must be observable collective dynamics.
+A localized collective structural anomaly must be visible in the crowd.
 
 ---
 
