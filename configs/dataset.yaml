@@ -1,4 +1,11 @@
-path: data/processed
+# EVOLVE — YOLO dataset config (Ultralytics)
+# Split created by: scripts/dataset/split_from_processed_pool_copy.py
+# Expected structure:
+#   data/processed/yolo/
+#     images/{train,val,test}
+#     labels/{train,val,test}
+
+path: data/processed/yolo
 
 train: images/train
 val: images/val
