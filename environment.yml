@@ -2,22 +2,25 @@ name: evolve
 
 channels:
   - conda-forge
-  - defaults
 
 dependencies:
   - python=3.11
-  - numpy
-  - scipy
+  - numpy=1.26
   - pandas
+  - scipy
   - matplotlib
   - seaborn
-  - scipy
   - scikit-learn
+  - scikit-image
   - opencv
+  - tqdm
+  - pyyaml
   - jupyterlab
   - ipykernel
-  - tqdm
   - pip
+
   - pip:
-      - ultralytics
       - torch
+      - torchvision
+      - torchaudio
+      - ultralytics
