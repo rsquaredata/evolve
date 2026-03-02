@@ -1,0 +1,17 @@
+variable,VIF,Model
+const,1.5984993561489573,pretrained
+luminance_mean,1.2527098188800094,pretrained
+blur,2.1123122999894197,pretrained
+density,2.006651959721557,pretrained
+occupied_ratio,1.459858286181372,pretrained
+presence_mosh_pit,1.2689394989368028,pretrained
+presence_hands_raised,1.13579213550983,pretrained
+density_luminance_interaction,1.5216592304386976,pretrained
+const,1.5984993561489573,scratch
+luminance_mean,1.2527098188800094,scratch
+blur,2.1123122999894197,scratch
+density,2.006651959721557,scratch
+occupied_ratio,1.459858286181372,scratch
+presence_mosh_pit,1.2689394989368028,scratch
+presence_hands_raised,1.13579213550983,scratch
+density_luminance_interaction,1.5216592304386976,scratch
