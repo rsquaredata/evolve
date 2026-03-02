@@ -21,43 +21,47 @@
 
 **EVOLVE** is a structured object detection study focused on visually challenging real-world environments, using live metal concert imagery as a representative challenging domain.
 
-These environments combine:
-
-- Low and uneven illumination
-- Rapid and colored lighting shifts
+Live metal concert imagery is used as a representative domain combining multiple simultaneous visual challenges:
+- Low and highly uneven illumination
+- Rapid chromatic shifts (red / blue dominant lighting)
 - Motion blur
-- Dense crowds
-- Frequent occlusions
-- Handheld instability
+- High crowd density
+- Severe occlusion
+- Camera instability
 
-Such conditions introduce significant variability in visual scene properties.
+These conditions generate strong variability in scene-level visual properties.
 
 Beyond measuring detection performance under these conditions, EVOLVE investigates the following question:
 
-> How does object detection performance vary across visually challenging environments, and can this variability be explained by measurable scene properties?
+> To what extent can variations in object detection performance be explained by measurable scene-level properties?
 
-The project studies the statistical relationship between scene-level descriptors (visual and structural) and detection performance metrics.
+The project aims to quantify the relationship between environmental descriptors (e.g., luminance, blur, density) and detection metrics.
 
 ---
 
 ## Research Orientation
 
-EVOLVE combines;
+EVOLVE EVOLVE integrates:
 
-- Dataset construction and annotation calibration  
-- Controlled luminance stratification  
-- Structured quality control  
-- Quantitative analysis of performance variability 
+- Structured dataset construction
+- Annotation calibration and agreement analysis
+- Controlled luminance stratification
+- Quantitative performance modeling
 
-A central objective is to determine whether measurable scene properties (e.g., luminance distribution, blur, spatial density) account for systematic differences in detection outcomes.
+The emphasis is placed on:
 
-The emphasis is placed on experimental control, measurement rigor, and reproducible analysis.
+- Experimental control
+- Statistical rigor
+- Measurement transparency
+- Reproducibility
+
+Annotation is treated as a measurable experimental component rather than a preprocessing formality.
 
 ---
 
 ## Dataset Construction
 
-The dataset is built through a structured multi-stage pipeline:
+The dataset is built through a multi-stage controlled pipeline:
 
 ```
 Raw video collection
@@ -88,7 +92,39 @@ Full details are documented in:
 - Personal concert footage
 - Public YouTube videos (research use only)
 
-The dataset itself is **not distributed** due to licensing constraints.
+The dataset is **not distributed** due to licensing constraints.
+
+## Dataset Statistics
+
+| Split | Images |
+|-------|--------|
+| Train | 560 |
+| Validation | 70 |
+| Test | 70 |
+
+Total images: 700
+
+### Class Distribution (Training Set)
+
+| Class | Instances |
+|-------|-----------|
+| amp | 744 |
+| guitar | 440 |
+| drums | 287 |
+| micro | 275 |
+| mosh_pit | 83 |
+| hands_raised | 498 |
+
+### Global Class Distribution (All Splits)
+
+| Class | Instances |
+|-------|-----------|
+| amp | 879 |
+| guitar | 494 |
+| drums | 339 |
+| micro | 329 |
+| mosh_pit | 99 |
+| hands_raised | 593 |
 
 ---
 
@@ -103,6 +139,8 @@ The dataset itself is **not distributed** due to licensing constraints.
 | `mosh_pit` | Collective dynamic crowd movement |
 | `hands_raised` | Clusters of raised arms |
 
+The `mosh_pit` class represents a collective behavioral phenomenon rather than a discrete object, introducing structural annotation complexity.
+
 ---
 
 ## Modeling
@@ -110,6 +148,7 @@ The dataset itself is **not distributed** due to licensing constraints.
 - Framework: PyTorch  
 - Detector: YOLOv8 (Ultralytics)  
 - Training approach: transfer learning from COCO pre-trained weights  
+- Controlled comparison: pretrained vs training-from-scratch
 - Evaluation stratified by luminance categories  
 
 ---
@@ -118,21 +157,64 @@ The dataset itself is **not distributed** due to licensing constraints.
 
 ### Quantitative Metrics
 
-- mAP
+- mAP (50 and 50-95)
 - Precision / Recall per class
 - IoU
-- Performance comparison across luminance strata  
+- Stratified performance comparison
 
 ### Qualitative Analysis
 
-- Error typology
 - Failure case inspection
-- Lighting-specific degradation patterns
-- Ambiguity analysis in dense and dynamic scenes  
+- Lighting-dependent degradation
+- Dense-scene ambiguity
+- Class-specific instability patterns
 
 ---
 
-## Project Structure
+## Key Experimental Results
+
+### Validation Performance
+
+| Model | mAP@0.5:0.95 | mAP@0.5 |
+|-------|--------------|---------|
+| Pretrained (COCO) | ~0.17 | ~0.30 |
+| Scratch | ~0.03 | ~0.08 |
+
+Transfer learning yields a substantial performance gain under extreme lighting conditions.
+
+Training from scratch fails to converge to competitive detection performance, highlighting the importance of prior visual knowledge in low-light, high-variance domains.
+
+### Scene-Level Correlation Analysis (Pretrained Model)
+
+| Variable | r | R² | p-value | Interpretation |
+|----------|----|------|----------|---------------|
+| Mean luminance | 0.391 | 0.153 | 0.001 | Moderate positive correlation |
+| Blur | -0.110 | 0.012 | 0.364 | Not significant |
+| Density | -0.080 | 0.006 | 0.511 | Not significant |
+| Occupied area | -0.070 | 0.005 | 0.567 | Not significant |
+
+Detection recall is significantly associated with scene luminance (p = 0.001), whereas blur and structural density do not exhibit statistically significant influence in this dataset.
+
+## Qualitative Comparison
+
+Example detection output on a high-illumination but high-glare frame:
+
+<p align="center">
+  <img src="results/qualitative_examples/IMG_3644_frame_0006_comparison.png" width="800">
+</p>
+
+The pretrained model correctly detects drums and guitar elements under extreme brightness and glare conditions, whereas the scratch model exhibits reduced localization accuracy and missed detections.
+
+### Main Takeaway
+
+Object detection performance in extreme concert environments is not uniformly degraded.
+Instead, performance variability is partially structured and statistically linked to scene luminance.
+
+This suggests that environmental descriptors can help anticipate detection reliability in real-world low-light deployments.
+
+---
+
+## Repository Structure
 
 ```
 EVOLVE/
@@ -142,9 +224,6 @@ EVOLVE/
 │ ├── interim/
 │ └── processed/
 ├── doc/
-│ ├── dataset_pipeline.md
-│ ├── calibration_protocol.md
-│ └── inter_annotator_analysis.md
 ├── metadata/
 ├── notebooks/
 ├── results/
@@ -152,20 +231,16 @@ EVOLVE/
 └── README.md
 ```
 
-The repository emphasizes:
-
-- reproducibility
-- traceability
-- structured dataset governance
-
 ---
 
 ## Limitations
 
 - Limited dataset size
-- Domain specificity (concert imagery)
+- Domain specificity
 - Residual annotation subjectivity
 - Extreme lighting variability  
+
+These constraints are explicitly considered in the analysis.
 
 ---
 
@@ -173,24 +248,16 @@ The repository emphasizes:
 
 Future work may include:
 
-- Larger-scale dataset extension
+- Dataset extension
 - Domain adaptation experiments
-- Controlled ablation on lighting preprocessing
-- Cross-model comparative analysis
+- Lighting-aware preprocessing ablation
+- Cross-architecture comparison
 
 ---
 
 ## License
 
 Academic project - non-commercial use only.
-
----
-
-## A Reality Check
-
-Building real-world computer vision systems often looks glamorous. However large-scale manual annotation remains a central bottleneck.
-
-In EVOLVE, annotation is treated as a structured, calibrated and measurable process rather than a hidden cost.
 
 ---
 
