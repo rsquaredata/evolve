@@ -1,167 +1,121 @@
-## 1. Introduction and Problem Statement
+## 1. Introduction
 
-The EVOLVE project (Extreme Vision Over Low‑light and Volatile Environments) investigates the robustness of deep learning architectures in high-density, low-visibility scenarios—specifically within the context of live music events.
+The EVOLVE project (*Extreme Vision Over Low-light and Volatile Environments*) studies object detection under visually adverse real-world conditions.
 
-## 1.1. The Challenge of Adverse Environments
+Unlike standard benchmarks such as COCO, live concert environments simultaneously combine:
+- Low and uneven illumination
+- Chromatic bias (dominant red/blue lighting)
+- Motion blur
+- High crowd density
 
-While standard computer vision benchmarks (e.g., COCO) assume optimal lighting and clear object separation, real-world "extreme" environments present three fundamental hurdles:
+These factors degrade edge contrast, reduce feature separability, and introduce instability in bounding-box localization.
 
-1. **Feature collapse**: As noted by **Morawski et al. (2021)**, extreme low-light is a representation problem. Traditional CNNs often fail to extract usable features as object edges and keypoints are lost in the noise floor.
+Rather than maximizing benchmark performance, EVOLVE investigates the following question:
+> Can variations in detection performance be statistically associated with measurable scene-level properties?
 
-2. **Perceptual vs. machine quality**: Conventional image enhancement often optimizes for human vision (brightness), which can introduce artifacts that degrade detector performance.
+## 2. Dataset
 
-3. **Semantic volatility**: Dense crowds and motion blur create "camouflaged" targets where semantic components (e.g., `mosh_pit`, `hands_raised`) lack the sharp geometric boundaries expected by standard detectors.
+### 2.1. Collection Pipeline
 
-## 1.2. Project Objective
+The dataset was constructed through a structured multi-stage pipeline:
 
-The objective of this project is to implement an end-to-end pipeline for **Object Detection** in these volatile environments. We aim to demonstrate that by **fine-tuning** a State-of-the-Art (SOTA) architecture, namely **YOLOv8**, on a custom-curated dataset of 150+ images, we aim to maintain meaningful detection performance even when traditional visual cues are significantly degraded.
+Raw video collection → Frame extraction → Luminance computation → Stratified sampling → Manual annotation → Quality control → Reproducible split
 
-## 2. Architecture Choice and Justification
+Initial extraction:
+- 2650 frames from 16 publicly available YouTube videos
+- 1888 additional frames extracted from personal concert recordings
+- 798 retained after filtering
+- Final curated dataset: **700 images**
+
+The inclusion of both public and personally recorded material increases environmental variability (venues, lighting systems, camera sensors) while maintaining consistent annotation criteria.
 
 For the EVOLVE project, we have selected **YOLOv8s** (You Only Look Once, version 8 Small) as the core detection architecture. This choice is justified by both the operational constraints of the project and the specific technical requirements of extreme-light environments.
 
-## 2.1. Technical Alignment with Literature
+### 2.2. Split
 
-The literature review highlights two major hurdles that YOLOv8 is uniquely equipped to handle:
+| Split      | Images |
+| ---------- | ------ |
+| Train      | 560    |
+| Validation | 70     |
+| Test       | 70     |
 
-- **Feature recovery via FPN**: **Zhang et al. (2022)** emphasized the need for feature reuse to recover small-object information lost in deep layers. YOLOv8 utilizes a **Feature Pyramid Network (FPN)** and a **Path Aggregation Network (PAN)**, which allow for multi-scale feature fusion. This ensures that faint structural cues of instruments or equipment are preserved across different spatial resolutions.
+Random seed:42
 
-- **Spatial attention and representation**: As **Morawski et al. (2021)** noted, low-light detection is a representation problem. YOLOv8’s use of **C2f modules** (cross-stage partial bottlenecks) enhances the gradient flow and allows the model to learn more robust representations of "camouflaged" targets, such as crowd members in deep shadows.
+### 2.3. Class Distribution (Global)
 
-## 2.2. Selection of the "Small" Variant (YOLOv8s)
+| Class        | Instances |
+| ------------ | --------- |
+| amp          | 879       |
+| guitar       | 494       |
+| drums        | 339       |
+| micro        | 329       |
+| mosh_pit     | 99        |
+| hands_raised | 593       |
 
-We opted for the **Small (s)** variant rather than Nano (n) or Large (x) for the following reasons:
+Minimum per class: 99 instances.
 
-- **Sensitivity vs. noise**: The Nano variant lacks the parameter depth to distinguish between image noise and actual features in low-light.
+The dataset shows moderate imbalance, with `mosh_pit` being the least represented class.
 
-- **Inference speed**: The Small variant offers a superior balance for the "Volatile" aspect of EVOLVE, maintaining high inference speeds (essential for crowd dynamics) while providing enough capacity for fine-tuning on a small, specialized dataset.
+## 3. Architecture and Training
 
-## 2.3. Transfer Learning Strategy
+We selected YOLOv8s for the following reasons:
+- Multi-scale feature aggregation (FPN + PAN)
+- Parameter capacity suitable for medium-sized datasets
+- Efficient training with limited computational resources
 
-To satisfy the  requirement for finetuning, we initialized the model with weights pre-trained on the COCO dataset.
+Training configuration:
+- Image resolution: 640×640
+- Epochs: 30
+- Batch size: 16
+- Transfer learning from COCO
+- Deterministic mode enabled
 
-- **Base knowledge**: We leverage COCO’s pre-learned filters for basic shapes and person detection.
+Two training regimes were compared:
+- Fine-tuned COCO-pretrained model
+- Training from scratch
 
-- **Domain adaptation**: We then adapt the "head" of the network to our specific classes (`mosh_pit`, `hands_raised`, `amp`, etc.), where visual boundaries differ significantly from the standard COCO "person" or "chair" classes.
+## 4. Results
 
-# 3. Dataset Methodology
+### 4.1. Quantitative Performance
 
-## 3.1. Data Collection & Extraction
+#### Validation Performance
 
-Unlike standard datasets, the EVOLVE dataset was curated to capture "Extreme Vision" conditions. We implemented a dedicated collection pipeline:
+| Model                   | mAP@0.5:0.95 | mAP@0.5 |
+| ----------------------- | ------------ | ------- |
+| Pretrained (fine-tuned) | ~0.17        | ~0.30   |
+| Scratch                 | ~0.03        | ~0.08   |
 
-- **Sources**: Publicly available concert footage and images, as well as personal photos.
-- **Sampling**: Frames were extracted at a fixed temporal rate (1 frame every 5 seconds) using a custom shell script (`youtube_pipeline.sh`) to ensure visual diversity and avoid high temporal correlation between training samples.
-- **Selection**: Images were manually screened to ensure the presence of target semantic components under varying degrees of lighting volatility.
+Training from scratch does not achieve comparable performance levels.  
+Pretraining provides a substantial improvement in detection metrics under low-light conditions.
 
-1st batch:
-2650 frames from 16 YT videos
-✅ Pre-filtering completed
-✔ Kept images     : 798
-✖ Discarded images: 1851
+### 4.2? Scene-Level Correlation Analysis
 
-## 3.2. Target Classes and Annotation
+For the pretrained model:
 
-We defined 6 distinct classes that represent the structural and semantic pillars of a live music environment. Each class was annotated with a minimum of 30 instances.
+| Variable       | r      | R²    | p-value |
+| -------------- | ------ | ----- | ------- |
+| Luminance      | 0.391  | 0.153 | 0.001   |
+| Blur           | -0.110 | 0.012 | 0.364   |
+| Density        | -0.080 | 0.006 | 0.511   |
+| Occupied ratio | -0.070 | 0.005 | 0.567   |
 
-| **Class Name** | **Type**  | **Description**                                           |
-|----------------|-----------|-----------------------------------------------------------|
-| `amp`          | Rigid     | Guitar/Bass amplifiers, often partially obscured.         |
-| `guitar`       | Rigid     | Stringed instruments (guitars/basses).                    |
-| `drums`        | Complex   | Percussion elements, often high-density/occluded.         |
-| `micro`        | Small     | Microphones and stands; challenging due to thin geometry. |
-| `mosh_pit`     | Amorphous | High-motion crowd zones; defined by collective texture.   |
-| `hands_raised` | Amorphous | Foreground crowd silhouettes; high occlusion potential.   |
+Only luminance shows a statistically significant association with recall (p = 0.001).
 
-These classes were deliberately designed to mix rigid objects and amorphous crowd phenomena, in order to test the limits of bounding-box-based detectors in volatile environments.
+This indicates that detection variability is partially structured by illumination level, whereas blur and density do not show statistically significant effects in this dataset.
 
-## 3.3. Quality Control and Preprocessing
+## 5. Qualitative Analysis
 
-To ensure the integrity of the model's training, we implemented a multi-stage validation process:
+Observations from visual inspection:
+- Rigid objects (`amp`, `drums`) are more frequently detected in higher-luminance frames.
+- Thin structures (`micro`) are occasionally missed when contrast is low.
+- `mosh_pit` bounding boxes show localization variability due to diffuse boundaries.
 
-- **Consistency checks**: A custom script (`sanity_checks.py`) was used to verify that every image possessed a corresponding label file and that no empty labels were introduced.
-- **Instance balancing**: Using `count_instances.py`, we monitored class distribution to avoid significant bias toward common classes like `hands_raised`.
-- **Reproducible split**: The dataset was partitioned into **Train** (70%), **Validation** (20%), and **Test** (10%) using a fixed random seed (`42`) to allow for reproducible experimental results.
+Failure cases often occur in frames with very low mean luminance (< 20 pixel intensity), where edge contrast is minimal.
 
-## 4. Training Protocol and Hyperparameters
+## 6. Conclusion
 
-This section details the specific configuration used in the `evolve_training.ipynb` notebook.
-
-## 4.1. Fine-tuning Configuration
-
-We utilized a **Transfer Learning** strategy by initializing our model with weights from the COCO dataset. This allows the model to leverage pre-learned low-level features (edges, textures) while specializing the high-level detection head for our specific domain.
-
-- **Optimizer**: As implemented in the Ultralytics YOLOv8 framework, we utilized the **Auto-optimizer** (typically SGD or AdamW in YOLOv8) with a standard learning rate schedule.
-- **Epochs**: Set to **50**, providing enough iterations for the model to converge on the specialized concert features without overfitting the small dataset.
-- **Batch size**: Set to **16**, a choice governed by GPU memory constraints in the Google Colab environment while maintaining sufficient gradient stability.
-- **Image resolution**: Maintained at 640x640. Given the adverse lighting conditions of the EVOLVE dataset, structural details are already degraded by noise. We maintained the native 640px resolution to maximize feature density. This prevents the "vanishing" of small semantic components, such as microphones or instruments, which are essential for accurate scene reconstruction in dense crowd environments.
-
-# 5. Results and Evaluation
-
-## 5.1. Quantitative Results (mAP)
-
-Following the fine-tuning process, the model was evaluated on the unseen test set (10% of the total dataset). We report **mean Average Precision at IoU threshold 0.5 (mAP@0.5)**, which is the standard metric for object detection.
-
-To assess the actual impact of domain-specific fine-tuning, we compare our results against a baseline model consisting of a YOLOv8s network **pre-trained on COCO and evaluated directly on the EVOLVE test set without any fine-tuning**.
-
-This baseline represents the performance of a generic object detector when confronted with extreme low-light, high-density concert imagery.
-
-| **Model**               | **Precision** | **Recall** | **mAP@0.5** |
-| ----------------------- | ------------- | ---------- | ----------- |
-| YOLOv8s (COCO baseline) | -             | -          | -           |
-| YOLOv8s (EVOLVE FT)     | -             | -          | -           |
-
-A class-wise breakdown of the fine-tuned model is reported below:
-
-| **Class**      | **Precision** | **Recall** | **mAP@.5** |
-|----------------|---------------|------------|------------|
-| `amp`          | - | - | - | 
-| `guitar`       | - | - | - | 
-| `drums`        | - | - | - | 
-| `micro`        | - | - | - | 
-| `mosh_pit`     | - | - | - | 
-| `hands_raised` | - | - | - | 
-| All Classes    | - | - | - | 
-
-As expected, the COCO-pretrained baseline struggles to generalize to EVOLVE-specific semantic concepts (e.g., `mosh_pit`, `hands_raised`) and to detect rigid objects under extreme illumination loss. Fine-tuning on the EVOLVE dataset significantly improves detection performance, confirming the importance of domain adaptation in volatile, low-visibility environments.
-
-## 5.2. Qualitative Analysis: Success Cases
-
-The model demonstrated a high degree of robustness in several "extreme" conditions:
-
-- **Strong chromatic bias**: Despite intense red and blue stage lighting, the model successfully localized rigid objects like `amp` and `drums`, suggesting that the architecture learned structural geometric features rather than relying purely on color histograms.
-- **Crowd silhouette detection**: The `hands_raised` class showed high recall even in near-zero visibility (backlit conditions), effectively utilizing the contrast between the crowd silhouettes and the stage lights.
-
-## 5.3. Error Analysis and Failure Modes
-
-We identified recurring failure patterns:
-
-- **Scale invariance issues (`micro`)**: Small microphones were occasionally missed when positioned against a complex, noisy background (e.g., in front of a drum kit). This highlights the difficulty of detecting thin, linear objects in low-contrast environments.
-- **Semantic overlap**: Confusions between `guitar` and `micro` (stands) occurred in extremely dark frames where only the vertical silhouette was visible.
-- **Boundary ambiguity (`mosh_pit`)**: Because the `mosh_pit` is an amorphous crowd zone, the model sometimes struggled with precise bounding box localization (IoU errors), even when the semantic identification was correct.
-
-# 6. Conclusion
-
-The EVOLVE project successfully demonstrates that **YOLOv8**, when properly fine-tuned, can serve as a reliable detector in adverse live-music environments. By prioritizing feature density (640px resolution) and domain-specific classes (`mosh_pit`), we achieved a pipeline that outperforms generic "COCO-trained" models which typically fail to recognize specialized concert gear or crowd behaviors.
-
-## Future Perspectives:
-
-- **Temporal integration**: Future iterations could move beyond static frames to utilize motion vectors (MII) directly from the video stream to resolve ambiguities in static silhouettes.
-- **Dataset expansion**: Increasing the instance count for the `micro` class would likely reduce the scale-invariance failures identified during evaluation.
-- **Representation learning beyond bounding boxes**: Exploring segmentation or region-based representations could better capture amorphous phenomena such as mosh pits.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+The EVOLVE project shows that:
+1. Transfer learning is necessary for detection in low-visibility concert environments.
+2. Detection performance variation is statistically associated with scene luminance.
+3. Amorphous crowd-based classes present intrinsic challenges for bounding-box-based detectors.
 
